@@ -276,9 +276,26 @@
                                 <p class="text-brand-danger font-semibold text-sm" x-text="errorMessage"></p>
                             </div>
 
-                            <!-- PDF Iframe -->
-                            <div x-show="previewPdfUrl && !loading && !downloading" class="flex-1 p-2">
+                            <!-- ✅ PDF Iframe (Iboneka gusa kuri Mudasobwa nini - Desktop) -->
+                            <div x-show="previewPdfUrl && !loading && !downloading" class="hidden lg:flex flex-1 p-2">
                                 <iframe :src="previewPdfUrl" class="w-full h-full rounded-xl bg-white" frameborder="0"></iframe>
+                            </div>
+
+                            <!-- ✅ Kuri Telefoni/Tablet, hagaragara buto zo gufungura cyangwa gukura -->
+                            <div x-show="previewPdfUrl && !loading && !downloading" class="flex lg:hidden flex-1 flex-col items-center justify-center p-6 text-center">
+                                <div class="w-20 h-20 rounded-full bg-brand-info/10 flex items-center justify-center mb-4">
+                                    <i class='bx bxs-file-pdf text-4xl text-brand-info'></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-white mb-2">PDF Yakoze Neza!</h3>
+                                <p class="text-sm text-slate-500 mb-6 max-w-xs">Kuri telefoni/tablet, ntushobora kureba PDF muri iyi screen. Kanda buto hepfo ujye kureba cyangwa uyikure.</p>
+                                <div class="flex flex-col gap-3 w-full max-w-xs">
+                                    <a :href="previewPdfUrl" target="_blank" class="w-full py-3 bg-brand-surface border border-brand-border text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-white/5 transition-all">
+                                        <i class='bx bx-external-link text-lg'></i> Fungura muri Tab Nshya
+                                    </a>
+                                    <button @click="downloadPDF()" class="w-full py-3 bg-gradient-to-r from-brand-success to-emerald-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 shadow-glow-green">
+                                        <i class='bx bx-download text-lg'></i> Kurura (Download)
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
