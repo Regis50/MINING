@@ -1,0 +1,6 @@
+Flask
+pandas
+reportlab
+gspread
+oauth2client
+gunicorn
