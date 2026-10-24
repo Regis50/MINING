@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T&J THINK BIG MINING COMPANY LTD | Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Inter"', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            bg: '#050505',
+                            surface: '#0F1115',
+                            card: '#161A22',
+                            border: '#262B37',
+                            primary: '#FFB020', // Gold
+                            success: '#00E599', // Emerald
+                            danger: '#FF4D4D',
+                            info: '#3399FF'
+                        }
+                    },
+                    boxShadow: {
+                        'premium': '0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                        'glow-gold': '0 0 30px -5px rgba(255, 176, 32, 0.4)',
+                        'glow-green': '0 0 30px -5px rgba(0, 229, 153, 0.4)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { 
+            background-color: #050505; 
+            color: #E2E8F0; 
+            font-family: 'Inter', sans-serif; 
+            -webkit-font-smoothing: antialiased;
+        }
+        body::before { 
+            content: ''; 
+            position: fixed; 
+            inset: 0; 
+            background: 
+                radial-gradient(circle at 50% 0%, rgba(255, 176, 32, 0.05), transparent 40%),
+                radial-gradient(circle at 50% 100%, rgba(0, 229, 153, 0.05), transparent 40%); 
+            pointer-events: none; 
+            z-index: 0; 
+        }
+        .glass-panel { 
+            background: rgba(22, 26, 34, 0.6); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.06); 
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #262B37; border-radius: 10px; }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body x-data="app()" x-init="init()" x-cloak class="h-screen flex flex-col overflow-hidden">
+
+    <!-- ========================================== -->
+    <!-- LOGIN SCREEN -->
+    <!-- ========================================== -->
+    <div x-show="!isLoggedIn" class="absolute inset-0 z-50 flex items-center justify-center p-4 bg-brand-bg">
+        <div class="glass-panel p-8 md:p-10 rounded-3xl w-full max-w-md shadow-premium relative overflow-hidden">
+            <div class="absolute -top-20 -right-20 w-40 h-40 bg-brand-primary/20 rounded-full blur-3xl"></div>
+            
+            <div class="flex flex-col items-center mb-8 relative z-10">
+                <div class="w-20 h-20 rounded-2xl bg-white flex items-center justify-center shadow-glow-gold mb-4 p-2">
+                    <img src="/static/logo.png" alt="Logo" class="w-full h-full object-contain" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'bx bx-diamond text-4xl text-brand-primary\'></i>';">
+                </div>
+                <h1 class="text-xl md:text-2xl font-bold text-white mb-1 text-center">T&J THINK BIG MINING COMPANY LTD</h1>
+                <p class="text-sm text-slate-400">Sign in to Reporting System</p>
+            </div>
+
+            <form @submit.prevent="login()" class="space-y-5 relative z-10">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Username</label>
+                    <div class="relative">
+                        <i class='bx bx-user absolute left-4 top-3.5 text-slate-500 text-lg'></i>
+                        <input type="text" x-model="username" placeholder="Enter username" class="w-full bg-brand-surface border border-brand-border rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-brand-primary/50 focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-slate-600">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wide">Password</label>
+                    <div class="relative">
+                        <i class='bx bx-lock-alt absolute left-4 top-3.5 text-slate-500 text-lg'></i>
+                        <input type="password" x-model="password" placeholder="••••••••" class="w-full bg-brand-surface border border-brand-border rounded-xl py-3 pl-12 pr-4 text-sm text-white focus:outline-none focus:border-brand-primary/50 focus:ring-1 focus:ring-brand-primary/50 transition-all placeholder:text-slate-600">
+                    </div>
+                </div>
+
+                <div x-show="loginError" class="text-brand-danger text-xs font-medium bg-brand-danger/10 p-2 rounded-lg text-center" x-text="loginError"></div>
+
+                <button type="submit" :disabled="isLoggingIn" class="w-full py-3.5 bg-gradient-to-r from-brand-primary to-orange-500 text-black rounded-xl font-bold text-sm shadow-glow-gold hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                    <i class='bx bx-log-in-circle text-lg' x-show="!isLoggingIn"></i>
+                    <i class='bx bx-loader-alt bx-spin text-lg' x-show="isLoggingIn"></i>
+                    <span x-text="isLoggingIn ? 'Authenticating...' : 'Sign In'"></span>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-brand-border/50 text-center relative z-10">
+                <p class="text-xs text-slate-500 font-medium mb-2">T&J THINK BIG MINING COMPANY LTD</p>
+                <div class="flex items-center justify-center gap-4 text-xs text-slate-400">
+                    <span class="flex items-center gap-1"><i class='bx bx-id-card'></i> TIN: 121715003</span>
+                    <span class="flex items-center gap-1"><i class='bx bx-phone'></i> 0782992433</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- MAIN DASHBOARD (Responsive) -->
+    <!-- ========================================== -->
+    <div x-show="isLoggedIn" class="flex w-full h-full relative" x-transition.opacity.duration.500ms>
+        
+        <!-- MOBILE MENU OVERLAY -->
+        <div x-show="isMobileMenuOpen" @click="isMobileMenuOpen = false" class="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"></div>
+
+        <!-- SIDEBAR (Responsive) -->
+        <aside :class="isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" class="absolute lg:relative z-50 w-72 h-full glass-panel border-r border-brand-border flex flex-col transition-transform duration-300 ease-in-out">
+            
+            <!-- Header Area -->
+            <div class="min-h-[7rem] flex items-center justify-between lg:justify-start px-5 border-b border-brand-border/50 py-3">
+                <div class="flex items-center gap-4">
+                    <!-- Logo Nini -->
+                    <div class="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-[0_0_15px_rgba(255,176,32,0.3)] overflow-hidden p-1.5 shrink-0">
+                        <img src="/static/logo.png" alt="Logo" class="w-full h-full object-contain" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'bx bx-diamond text-3xl text-brand-primary\'></i>';">
+                    </div>
+                    
+                    <div class="flex flex-col justify-center">
+                        <!-- Izina ryuzuye ry'ikigo -->
+                        <h1 class="text-[14px] font-extrabold text-white leading-tight tracking-tight">T&J THINK BIG MINING COMPANY LTD</h1>
+                        
+                        <!-- Amakuru ku murongo umwe (Horizontal) -->
+                        <div class="text-[10px] text-slate-400 mt-2 flex flex-col gap-1 font-medium">
+                            <span class="flex items-center gap-1"><i class='bx bx-id-card text-brand-primary'></i> TIN: 121715003</span>
+                            <span class="flex items-center gap-1"><i class='bx bx-phone text-brand-primary'></i> TEL: 0782992433</span>
+                            <span class="flex items-center gap-1"><i class='bx bx-envelope text-brand-primary'></i> uwijacky15@gmail.com</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Close Button (Mobile Only) -->
+                <button @click="isMobileMenuOpen = false" class="lg:hidden text-slate-400 hover:text-white">
+                    <i class='bx bx-x text-2xl'></i>
+                </button>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="flex-1 py-6 space-y-1 px-3 overflow-y-auto">
+                <a href="#" class="flex items-center gap-3 px-3 py-3 rounded-lg bg-brand-primary/10 text-brand-primary border border-brand-primary/20 transition-all">
+                    <i class='bx bxs-dashboard text-xl'></i>
+                    <span class="font-semibold text-sm">Dashboard</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+                    <i class='bx bx-file text-xl'></i>
+                    <span class="font-medium text-sm">Reports</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+                    <i class='bx bx-data text-xl'></i>
+                    <span class="font-medium text-sm">Data Center</span>
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+                    <i class='bx bx-cog text-xl'></i>
+                    <span class="font-medium text-sm">Settings</span>
+                </a>
+            </nav>
+
+            <!-- User Profile & Logout -->
+            <div class="p-4 border-t border-brand-border/50">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-brand-card border border-brand-border flex items-center justify-center shrink-0">
+                            <i class='bx bx-user text-slate-400'></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-white" x-text="userRole || 'Admin User'"></p>
+                            <p class="text-xs text-brand-success flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-brand-success"></span>Online</p>
+                        </div>
+                    </div>
+                    <button @click="logout()" class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-brand-danger/20 text-slate-400 hover:text-brand-danger transition-colors" title="Logout">
+                        <i class='bx bx-log-out text-lg'></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="flex-1 flex flex-col h-full relative z-10 overflow-hidden">
+            
+            <!-- HEADER -->
+            <header class="h-20 glass-panel border-b border-brand-border flex items-center justify-between px-4 lg:px-8 shrink-0">
+                <div class="flex items-center gap-3">
+                    <!-- Hamburger Menu (Mobile Only) -->
+                    <button @click="isMobileMenuOpen = true" class="lg:hidden text-slate-300 hover:text-white p-2 -ml-2 rounded-lg hover:bg-white/5">
+                        <i class='bx bx-menu text-2xl'></i>
+                    </button>
+                    <div>
+                        <h2 class="text-lg lg:text-xl font-bold text-white">Report Overview</h2>
+                        <p class="text-[11px] lg:text-xs text-slate-400 mt-0.5 lg:mt-1 hidden sm:block">Manage and generate your company reports.</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2 lg:gap-4">
+                    <!-- Sync Timer -->
+                    <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg bg-brand-surface border border-brand-border">
+                        <i class='bx bx-sync text-brand-primary animate-spin-slow' style="animation-duration: 3s;"></i>
+                        <span class="text-xs font-medium text-slate-300">Sync: <span class="text-brand-primary font-bold" x-text="countdownText"></span></span>
+                    </div>
+                    
+                    <!-- Status -->
+                    <div class="flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg bg-brand-surface border border-brand-border">
+                        <div class="relative flex h-2.5 w-2.5">
+                          <span x-show="loading" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2.5 w-2.5" :class="loading ? 'bg-amber-400' : (errorMessage ? 'bg-rose-500' : 'bg-brand-success')"></span>
+                        </div>
+                        <span class="text-[10px] lg:text-xs font-bold uppercase tracking-wide" :class="loading ? 'text-amber-400' : (errorMessage ? 'text-rose-400' : 'text-brand-success')" x-text="loading ? 'Connecting' : (errorMessage ? 'Offline' : 'Live')"></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- SCROLLABLE CONTENT -->
+            <div class="flex-1 overflow-y-auto p-4 lg:p-8">
+                <div class="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    
+                    <!-- LEFT: PDF VIEWER -->
+                    <div class="xl:col-span-2 space-y-6">
+                        <div class="glass-panel rounded-2xl p-1 shadow-premium h-[60vh] xl:h-[calc(100vh-8rem)] flex flex-col relative overflow-hidden">
+                            
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-brand-border/50 bg-brand-surface/50 rounded-t-2xl">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg bg-brand-info/10 text-brand-info flex items-center justify-center">
+                                        <i class='bx bxs-file-pdf text-lg'></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xs lg:text-sm font-bold text-white" x-text="currentPreviewType ? currentPreviewType.toUpperCase() + ' REPORT' : 'NO REPORT'"></h3>
+                                        <p class="text-[10px] text-slate-400">Preview Mode</p>
+                                    </div>
+                                </div>
+                                <button @click="fetchData()" :disabled="loading" class="px-2 lg:px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-xs font-semibold text-slate-300 transition-all flex items-center gap-2">
+                                    <i class='bx bx-refresh' :class="loading && 'animate-spin'"></i> <span class="hidden sm:inline">Refresh</span>
+                                </button>
+                            </div>
+
+                            <!-- Empty State -->
+                            <div x-show="!loading && !previewPdfUrl && !errorMessage" class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                                <div class="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                                    <i class='bx bx-file-blank text-3xl lg:text-4xl text-slate-500'></i>
+                                </div>
+                                <h3 class="text-base lg:text-lg font-bold text-white mb-2">No Document Selected</h3>
+                                <p class="text-xs lg:text-sm text-slate-500 max-w-xs">Select a report type from the panel to generate and view a PDF.</p>
+                            </div>
+
+                            <!-- Loading -->
+                            <div x-show="loading || downloading" class="flex-1 flex flex-col p-6 space-y-4 animate-pulse-slow">
+                                <div class="h-8 bg-white/5 rounded-md w-1/3"></div>
+                                <div class="flex-1 bg-white/5 rounded-xl border border-white/5"></div>
+                            </div>
+
+                            <!-- Error -->
+                            <div x-show="!loading && errorMessage" class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+                                <i class='bx bx-error-circle text-4xl lg:text-5xl text-brand-danger mb-3'></i>
+                                <p class="text-brand-danger font-semibold text-sm" x-text="errorMessage"></p>
+                            </div>
+
+                            <!-- PDF Iframe -->
+                            <div x-show="previewPdfUrl && !loading && !downloading" class="flex-1 p-2">
+                                <iframe :src="previewPdfUrl" class="w-full h-full rounded-xl bg-white" frameborder="0"></iframe>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: ACTIONS -->
+                    <div class="space-y-6">
+                        <div class="glass-panel rounded-2xl p-5 lg:p-6 shadow-premium relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 rounded-full blur-3xl"></div>
+                            
+                            <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                                <i class='bx bx-layer-plus text-brand-primary text-lg'></i> Generate Report
+                            </h3>
+                            
+                            <div class="space-y-3 relative z-10">
+                                <!-- Daily -->
+                                <button @click="generateAndPreview('daily')" :disabled="downloading || loading" class="w-full group flex items-center justify-between p-3 rounded-xl bg-brand-surface border border-brand-border hover:border-brand-primary/50 hover:bg-brand-primary/5 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-brand-info/10 text-brand-info flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <i class='bx bx-calendar text-xl'></i>
+                                        </div>
+                                        <div class="text-left">
+                                            <p class="text-sm font-bold text-white group-hover:text-brand-primary transition-colors">Daily</p>
+                                            <p class="text-[11px] text-slate-500">Raporo y'umunsi</p>
+                                        </div>
+                                    </div>
+                                    <i class='bx bx-right-arrow-alt text-2xl text-slate-600 group-hover:text-brand-primary group-hover:-translate-x-1 transition-all'></i>
+                                </button>
+
+                                <!-- Weekly -->
+                                <button @click="generateAndPreview('weekly')" :disabled="downloading || loading" class="w-full group flex items-center justify-between p-3 rounded-xl bg-brand-surface border border-brand-border hover:border-brand-primary/50 hover:bg-brand-primary/5 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <i class='bx bx-calendar-week text-xl'></i>
+                                        </div>
+                                        <div class="text-left">
+                                            <p class="text-sm font-bold text-white group-hover:text-brand-primary transition-colors">Weekly</p>
+                                            <p class="text-[11px] text-slate-500">Raporo y'icyumweru</p>
+                                        </div>
+                                    </div>
+                                    <i class='bx bx-right-arrow-alt text-2xl text-slate-600 group-hover:text-brand-primary group-hover:-translate-x-1 transition-all'></i>
+                                </button>
+
+                                <!-- Monthly -->
+                                <button @click="generateAndPreview('monthly')" :disabled="downloading || loading" class="w-full group flex items-center justify-between p-3 rounded-xl bg-brand-surface border border-brand-border hover:border-brand-success/50 hover:bg-brand-success/5 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-brand-success/10 text-brand-success flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <i class='bx bx-calendar-alt text-xl'></i>
+                                        </div>
+                                        <div class="text-left">
+                                            <p class="text-sm font-bold text-white group-hover:text-brand-success transition-colors">Monthly</p>
+                                            <p class="text-[11px] text-slate-500">Raporo y'ukwezi</p>
+                                        </div>
+                                    </div>
+                                    <i class='bx bx-right-arrow-alt text-2xl text-slate-600 group-hover:text-brand-success group-hover:-translate-x-1 transition-all'></i>
+                                </button>
+
+                                <!-- Yearly -->
+                                <button @click="generateAndPreview('yearly')" :disabled="downloading || loading" class="w-full group flex items-center justify-between p-3 rounded-xl bg-brand-surface border border-brand-border hover:border-purple-500/50 hover:bg-purple-500/5 transition-all">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                            <i class='bx bx-calendar-star text-xl'></i>
+                                        </div>
+                                        <div class="text-left">
+                                            <p class="text-sm font-bold text-white group-hover:text-purple-400 transition-colors">Yearly</p>
+                                            <p class="text-[11px] text-slate-500">Raporo y'umwaka</p>
+                                        </div>
+                                    </div>
+                                    <i class='bx bx-right-arrow-alt text-2xl text-slate-600 group-hover:text-purple-400 group-hover:-translate-x-1 transition-all'></i>
+                                </button>
+                            </div>
+
+                            <div class="mt-6">
+                                <button @click="downloadPDF()" :disabled="!previewPdfUrl || downloading" 
+                                        class="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-brand-success to-emerald-600 text-white rounded-xl font-bold text-sm shadow-glow-green disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed transition-all hover:scale-[1.02]">
+                                    <i class='bx bx-download text-lg'></i> Download PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        function app() {
+            return {
+                // Login State
+                isLoggedIn: false,
+                isLoggingIn: false,
+                username: '',
+                password: '',
+                loginError: '',
+                userRole: '',
+
+                // Dashboard State
+                isMobileMenuOpen: false,
+                jandtData: [],
+                loading: false,
+                downloading: false,
+                errorMessage: '',
+                previewPdfUrl: null,
+                currentPreviewType: null,
+                countdown: 300,
+                countdownText: '5:00',
+                cache: {},
+
+                async init() {
+                    if(sessionStorage.getItem('isLoggedIn') === 'true') {
+                        this.isLoggedIn = true;
+                        this.userRole = sessionStorage.getItem('userRole') || 'Admin';
+                        await this.fetchData();
+                        this.startCountdown();
+                    }
+                },
+
+                async login() {
+                    this.loginError = '';
+                    if(!this.username || !this.password) {
+                        this.loginError = "Please enter both username and password.";
+                        return;
+                    }
+                    
+                    this.isLoggingIn = true;
+                    
+                    try {
+                        const res = await fetch('/api/users');
+                        const data = await res.json();
+                        
+                        if(data.error) throw new Error(data.error);
+
+                        const validUser = data.users.find(u => 
+                            u.username === this.username && u.password === this.password
+                        );
+
+                        if(validUser) {
+                            this.isLoggedIn = true;
+                            this.userRole = validUser.role;
+                            sessionStorage.setItem('isLoggedIn', 'true');
+                            sessionStorage.setItem('userRole', validUser.role);
+                            
+                            await this.fetchData();
+                            this.startCountdown();
+                        } else {
+                            this.loginError = "Invalid username or password!";
+                        }
+                    } catch (err) {
+                        this.loginError = "System error: " + err.message;
+                    } finally {
+                        this.isLoggingIn = false;
+                    }
+                },
+
+                logout() {
+                    this.isLoggedIn = false;
+                    sessionStorage.removeItem('isLoggedIn');
+                    sessionStorage.removeItem('userRole');
+                    this.username = '';
+                    this.password = '';
+                    this.previewPdfUrl = null;
+                    this.currentPreviewType = null;
+                    this.cache = {};
+                    this.isMobileMenuOpen = false;
+                },
+
+                startCountdown() {
+                    setInterval(() => {
+                        if (this.countdown > 0) {
+                            this.countdown--;
+                        } else {
+                            this.countdown = 300;
+                            this.fetchData();
+                        }
+                        let m = Math.floor(this.countdown / 60);
+                        let s = this.countdown % 60;
+                        this.countdownText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                    }, 1000);
+                },
+
+                async fetchData() {
+                    this.loading = true;
+                    this.errorMessage = '';
+                    try {
+                        const res = await fetch('/api/data', { cache: 'no-store' });
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        this.jandtData = await res.json();
+                    } catch (err) {
+                        this.errorMessage = "Failed to connect to the server.";
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async generateAndPreview(type) {
+                    if (this.cache[type]) {
+                        this.previewPdfUrl = this.cache[type];
+                        this.currentPreviewType = type;
+                        return;
+                    }
+
+                    this.downloading = true;
+                    this.previewPdfUrl = null;
+                    this.currentPreviewType = type;
+                    
+                    try {
+                        const res = await fetch(`/generate_${type}`);
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        const blob = await res.blob();
+                        const url = URL.createObjectURL(blob);
+                        this.previewPdfUrl = url;
+                        this.cache[type] = url;
+                    } catch (err) {
+                        alert("Error generating PDF: " + err.message);
+                    } finally {
+                        this.downloading = false;
+                    }
+                },
+
+                async downloadPDF() {
+                    if (!this.previewPdfUrl) return;
+                    const a = document.createElement('a');
+                    a.href = this.previewPdfUrl;
+                    a.download = `T&J_${this.currentPreviewType}_Report.pdf`;
+                    a.click();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
