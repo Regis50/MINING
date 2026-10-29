@@ -16,25 +16,22 @@ def create_monthly_report(output_folder="reports"):
     
     list_of_files = glob.glob(f'{output_folder}/daily_*.csv')
     if not list_of_files:
-        print("❌ Nta makuru ya Daily abonetse muri 'reports'.")
+        print("❌ Nta makuru ya Daily (.csv) abonetse muri 'reports'.")
         return
 
     df_list = []
     for file in list_of_files:
         try:
-            # ✅ 1. KURAHO skiprows=1 no GUSHYIRAHO header=None
-            df = pd.read_csv(file, header=None)
+            df = pd.read_csv(file)
             df = df.apply(lambda x: x.astype(str).str.strip() if x.dtype == "object" else x)
             
-            match = re.search(r'(\d{4}-\d{2}-\d{2})', file)
+            match = re.search(r'(\d{4}[-_]\d{2}[-_]\d{2})', os.path.basename(file))
             if match:
-                raw_date = match.group(0)
-                try:
-                    dt = pd.to_datetime(raw_date)
-                    df['Date'] = dt.strftime('%Y-%m-%d')
-                    df_list.append(df)
-                except:
-                    pass
+                raw_date = match.group(0).replace("_", "-")
+                df['Date'] = raw_date
+                df_list.append(df)
+            else:
+                print(f"⚠️ Nta itariki yabonetse muri: {file}")
         except Exception as e:
             print(f"⚠️ Error reading file {file}: {e}")
 
@@ -44,44 +41,64 @@ def create_monthly_report(output_folder="reports"):
 
     df_all = pd.concat(df_list, ignore_index=True)
     
-    # ✅ 2. GUKURAHO UMURONGO WA MBERE (T&J THINK BIG...)
-    df_all = df_all[pd.to_numeric(df_all[1], errors='coerce').notna()]
-    
-    # ✅ 3. GUKURAHO IMIRONGO ITARI IY'IBICURUZWA
-    df_all = df_all[~df_all[0].astype(str).str.upper().str.contains('TOTAL|IMBOGA|DETAILS|KWIZERA|UWIMANA|BIKOREWE|T&J|TIN|GENERAL', na=False)]
+    # Gukura imirongo itari iy'ibicuruzwa
+    df_all['DETAILS'] = df_all['DETAILS'].astype(str).str.strip()
+    mask_valid = (
+        df_all['DETAILS'].notna()
+        & (df_all['DETAILS'] != "")
+        & (df_all['DETAILS'].str.upper() != "NAN")
+        & (~df_all['DETAILS'].str.upper().str.contains(
+            'TOTAL|IMBOGA|DETAILS|KWIZERA|UWIMANA|BIKOREWE|T&J|TIN|GENERAL|ITEM|SECTION',
+            na=False))
+    )
+    df_all = df_all[mask_valid].copy()
 
-    # ✅ 4. GUHINDURA IMBARE
-    df_all['Qty'] = df_all[1].astype(str).str.replace(r'[^\d.]', '', regex=True)
-    df_all['Qty'] = pd.to_numeric(df_all['Qty'], errors='coerce').fillna(0)
+    if df_all.empty:
+        print("❌ Nta bicuruzwa byabonetse nyuma yo gushungura.")
+        return
 
-    df_all['Unit_Price'] = df_all[2].astype(str).str.replace(r'[^\d.]', '', regex=True)
-    df_all['Unit_Price'] = pd.to_numeric(df_all['Unit_Price'], errors='coerce').fillna(0)
+    # Guhindura imibare
+    df_all['Qty'] = pd.to_numeric(
+        df_all['TODAY QUANTITY'].astype(str).str.replace(r'[^\d.\-]', '', regex=True),
+        errors='coerce'
+    ).fillna(0)
 
-    # ✅ 5. BARA TOTAL UKORESHEJE QTY * PRICE
+    df_all['Unit_Price'] = pd.to_numeric(
+        df_all['AVG UNIT PRICE'].astype(str).str.replace(r'[^\d.\-]', '', regex=True),
+        errors='coerce'
+    ).fillna(0)
+
+    # INYUNGU (PROFIT/LOSS)
+    if 'PROFIT/LOSS' in df_all.columns:
+        df_all['Profit'] = pd.to_numeric(
+            df_all['PROFIT/LOSS'].astype(str).str.replace(r'[^\d.\-]', '', regex=True),
+            errors='coerce'
+        ).fillna(0)
+    else:
+        df_all['Profit'] = 0.0
+
     df_all['Total'] = df_all['Qty'] * df_all['Unit_Price']
 
+    # Shaka ukwezi
     today = datetime.now()
     start_of_month = today.replace(day=1)
     days_in_month = (today.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)
-    
     days_of_month = [(start_of_month + timedelta(days=i)).strftime('%Y-%m-%d') for i in range((days_in_month - start_of_month).days + 1)]
     
-    df_all = df_all[df_all['Date'].isin(days_of_month)]
+    df_month = df_all[df_all['Date'].isin(days_of_month)].copy()
 
-    if df_all.empty:
+    if df_month.empty:
         print("⚠️ Nta makuru y'uku kwezi abonetse.")
         return
 
-    unique_products = df_all[0].unique()
+    unique_products = sorted(df_month['DETAILS'].unique())
 
     itariki_intangiriro = start_of_month.strftime('%d/%m/%Y')
     itariki_impera = days_in_month.strftime('%d/%m/%Y')
     itariki_yakorewe = datetime.now().strftime('%d/%m/%Y saa %H:%M')
 
     output_pdf = f"{output_folder}/Monthly_Report_{start_of_month.strftime('%Y-%m')}.pdf"
-    
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
+    os.makedirs(output_folder, exist_ok=True)
 
     doc = SimpleDocTemplate(
         output_pdf, 
@@ -127,10 +144,11 @@ def create_monthly_report(output_folder="reports"):
     elements.append(Spacer(1, 10))
 
     total_income_global = 0
+    total_profit_global = 0  # ✅ INYUNGU YOSE
     grand_total_qty_global = 0
     product_revenue_dict = {}
 
-    # Tugabanya iminsi 5 kuri buri table
+    # Gabanya iminsi 5 kuri buri table
     for group_idx in range(0, len(days_of_month), 5):
         days_group = days_of_month[group_idx:group_idx+5]
         
@@ -139,18 +157,18 @@ def create_monthly_report(output_folder="reports"):
         
         for i, day in enumerate(days_group):
             day_number = datetime.strptime(day, '%Y-%m-%d').strftime('%d')
-            header_row1.extend([f"Kuwa {day_number}", "", ""])
-            header_row2.extend(["Qty", "Unit", "Total"])
+            header_row1.extend([f"Kuwa {day_number}", "", "", ""]) # ✅ 4 columns kuri buri munsi
+            header_row2.extend(["Qty", "Unit", "Total", "Profit"]) # ✅ 4 columns kuri buri munsi
                 
-        header_row1.extend(["TOTAL", "", ""])
-        header_row2.extend(["Qty", "Unit Price", "Total"])
+        header_row1.extend(["TOTAL", "", "", ""])
+        header_row2.extend(["Qty", "Unit Price", "Total", "Profit"]) # ✅
         
         table_data = [header_row1, header_row2]
         
         table_styles = [
             ('BACKGROUND', (0, 0), (-1, 1), colors.HexColor("#FFC000")),
             ('FONTNAME', (0, 0), (-1, 1), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8), 
+            ('FONTSIZE', (0, 0), (-1, -1), 7), # ✅ Yagabanyijwe kugira ngo 4 cols zinjire
             ('GRID', (0, 0), (-1, -1), 0.3, colors.grey),
             ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
             ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
@@ -162,14 +180,15 @@ def create_monthly_report(output_folder="reports"):
 
         table_styles.append(('SPAN', (0, 0), (0, 1)))
         for i in range(len(days_group)):
-            start_col = 1 + (i * 3)
-            end_col = start_col + 2
+            start_col = 1 + (i * 4) # ✅ 4 columns kuri buri munsi
+            end_col = start_col + 3
             table_styles.append(('SPAN', (start_col, 0), (end_col, 0)))
-        table_styles.append(('SPAN', (len(days_group)*3 + 1, 0), (len(days_group)*3 + 3, 0)))
+        table_styles.append(('SPAN', (len(days_group)*4 + 1, 0), (len(days_group)*4 + 4, 0)))
 
         row_num = 2 
         group_total_income = 0
         group_total_qty = 0
+        group_total_profit = 0 # ✅
 
         for product in unique_products:
             if pd.isna(product) or str(product).strip() == "":
@@ -178,58 +197,70 @@ def create_monthly_report(output_folder="reports"):
             row = [str(product)]
             product_total_qty = 0
             product_amount = 0
+            product_profit = 0 # ✅
             last_valid_price = 0
             
             for i, day in enumerate(days_group):
-                # ✅ Gukoresha df_all[0] aho gukoresha iloc[:, 0]
-                day_data = df_all[(df_all[0] == product) & (df_all['Date'] == day)]
+                day_data = df_month[(df_month['DETAILS'] == product) & (df_month['Date'] == day)]
                 
                 if not day_data.empty:
                     qty = pd.to_numeric(day_data['Qty'], errors='coerce').sum()
                     price = pd.to_numeric(day_data['Unit_Price'], errors='coerce').mean()
                     total = pd.to_numeric(day_data['Total'], errors='coerce').sum()
+                    profit = pd.to_numeric(day_data['Profit'], errors='coerce').sum() # ✅
                     
-                    row.extend([int(qty) if qty > 0 else "", int(price) if price > 0 else "", int(total) if total > 0 else ""])
+                    row.extend([
+                        int(qty) if qty > 0 else "", 
+                        int(price) if price > 0 else "", 
+                        int(total) if total > 0 else "",
+                        int(profit) if profit != 0 else "" # ✅
+                    ])
                     product_total_qty += qty
                     product_amount += total
+                    product_profit += profit # ✅
                     if price > 0:
                         last_valid_price = price
                 else:
-                    row.extend(["", "", ""])
+                    row.extend(["", "", "", ""])
                     
             row.extend([
                 int(product_total_qty) if product_total_qty > 0 else "", 
                 int(last_valid_price) if last_valid_price > 0 else "", 
-                int(product_amount) if product_amount > 0 else ""
+                int(product_amount) if product_amount > 0 else "",
+                int(product_profit) if product_profit != 0 else "" # ✅
             ])
             table_data.append(row)
             
             group_total_qty += product_total_qty
             group_total_income += product_amount
+            group_total_profit += product_profit # ✅
             row_num += 1
 
-        total_row = ["GENERAL TOTAL"] + [""] * (len(days_group) * 3) + [f"{int(group_total_qty):,}", "", f"{int(group_total_income):,}"] 
+        # ✅ UMURONGO WA TOTAL
+        total_row = ["GENERAL TOTAL"] + [""] * (len(days_group) * 4) + [f"{int(group_total_qty):,}", "", f"{int(group_total_income):,}", f"{int(group_total_profit):,}"] 
         table_data.append(total_row)
 
-        table_styles.append(('SPAN', (0, row_num), (len(days_group)*3, row_num)))
+        table_styles.append(('SPAN', (0, row_num), (len(days_group)*4, row_num)))
         table_styles.append(('BACKGROUND', (0, row_num), (-1, row_num), colors.HexColor("#FFC000")))
-        table_styles.append(('BACKGROUND', (len(days_group)*3 + 1, row_num), (len(days_group)*3 + 3, row_num), colors.HexColor("#4472C4"))) 
-        table_styles.append(('TEXTCOLOR', (len(days_group)*3 + 1, row_num), (len(days_group)*3 + 3, row_num), colors.white))
+        table_styles.append(('BACKGROUND', (len(days_group)*4 + 1, row_num), (len(days_group)*4 + 4, row_num), colors.HexColor("#4472C4"))) 
+        table_styles.append(('TEXTCOLOR', (len(days_group)*4 + 1, row_num), (len(days_group)*4 + 4, row_num), colors.white))
         table_styles.append(('FONTNAME', (0, row_num), (-1, row_num), 'Helvetica-Bold'))
 
         grand_total_qty_global += group_total_qty
         total_income_global += group_total_income
+        total_profit_global += group_total_profit # ✅
 
         for product in unique_products:
              if pd.isna(product) or str(product).strip() == "": continue
-             prod_amount = sum(pd.to_numeric(df_all[(df_all[0] == product) & (df_all['Date'].isin(days_group))]['Total'], errors='coerce').fillna(0))
+             prod_amount = df_month[df_month['DETAILS'] == product]['Total'].sum()
              if str(product) in product_revenue_dict:
                  product_revenue_dict[str(product)] += prod_amount
              else:
                  product_revenue_dict[str(product)] = prod_amount
 
-        col_widths = [1.4*inch] + [0.4*inch, 0.45*inch, 0.5*inch] * len(days_group) + [0.5*inch, 0.6*inch, 0.6*inch]
-        table = Table(table_data, colWidths=col_widths)
+        # ✅ Guhindura ubugari bw'inkingi kugira ngo 4 cols zinjire (Col Widths)
+        col_widths = [1.3*inch] + [0.35*inch, 0.4*inch, 0.45*inch, 0.45*inch] * len(days_group) + [0.45*inch, 0.5*inch, 0.55*inch, 0.55*inch]
+        table = Table(table_data, colWidths=col_widths, repeatRows=2)
         table.setStyle(TableStyle(table_styles))
         elements.append(table)
         
@@ -237,7 +268,7 @@ def create_monthly_report(output_folder="reports"):
             elements.append(Spacer(1, 20)) 
 
     # =========================================================
-    # SUMMARY YA NYUMA
+    # SUMMARY YA NYUMA (INCAMAKE Y'UKWEZI)
     # =========================================================
     elements.append(Spacer(1, 15))
     summary_title_style = ParagraphStyle(
@@ -258,8 +289,9 @@ def create_monthly_report(output_folder="reports"):
     summary_data = [
         [Paragraph("<b>Metric / Ikigereranyo</b>", subtitle_style), Paragraph("<b>Product Name / Izina</b>", subtitle_style), Paragraph("<b>Value / Amafaranga (RWF)</b>", subtitle_style)],
         ["Total Monthly Income (Ayo Ukwezi Kose Cyinjije)", "All Products", f"{int(total_income_global):,}"],
-        ["Top Performing Product (Icyayinjuje Menshi)", top_product, f"{int(top_value):,}"],
-        ["Least Performing Product (Icyayinjuje Make)", least_product, f"{int(least_value):,}"]
+        ["Total Monthly Profit (Inyungu Yose Hamwe)", "All Products", f"{int(total_profit_global):,}"], # ✅ INYUNGU
+        ["Top Performing Product (Icyinjije Menshi)", top_product, f"{int(top_value):,}"],
+        ["Least Performing Product (Icyinjije Make)", least_product, f"{int(least_value):,}"]
     ]
     
     summary_table = Table(summary_data, colWidths=[3.5*inch, 3.5*inch, 3.0*inch])
@@ -279,9 +311,6 @@ def create_monthly_report(output_folder="reports"):
     ]))
     elements.append(summary_table)
 
-    # =========================================================
-    # UMURONGO UTANDUKANYA SUMMARY N'IMIKONO
-    # =========================================================
     elements.append(Spacer(1, 30)) 
     elements.append(Paragraph("<hr/>", styles['Normal'])) 
     elements.append(Spacer(1, 40)) 
