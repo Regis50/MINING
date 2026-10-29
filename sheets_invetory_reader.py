@@ -39,12 +39,10 @@ def _initialize_google_client():
     
     print("✅ Connected to Google Sheets API!")
 
-def read_as_table(tab_name: str,
-                  header_row: int = 0,
-                  data_start_row: int = 1) -> pd.DataFrame:
+def read_as_table(tab_name: str, header_row: int = 0, data_start_row: int = 1) -> pd.DataFrame:
     """
     Ubu iyi function isaba guhabwa 'tab_name' bitemewe guhora uhindura code rwagati.
-    Urugero: read_as_table("Form Responses 1") cyangwa read_as_table("Daily Report")
+    Urugero: read_as_table("Form Responses 1") cyangwa read_as_table("Daily Report", header_row=4, data_start_row=5)
     """
     _initialize_google_client()
 
@@ -69,6 +67,8 @@ def read_as_table(tab_name: str,
         return pd.DataFrame()
 
     width = max(len(row) for row in values)
+    
+    # ✅ HANO: Dufata umurongo wa header_row (urugero: umurongo wa 5 = index 4)
     raw_header = list(values[header_row]) if header_row < len(values) else []
 
     header, seen = [], {}
@@ -82,6 +82,7 @@ def read_as_table(tab_name: str,
         header.append(name)
     header += [f"col_{i}" for i in range(len(header), width)]
 
+    # ✅ HANO: Dufata amakuru atangira kuri data_start_row (urugero: umurongo wa 6 = index 5)
     data = [list(row) + [""] * (width - len(row)) for row in values[data_start_row:]]
     df = pd.DataFrame(data, columns=header)
 
@@ -98,18 +99,16 @@ if __name__ == "__main__":
     # UBU WAHAMAGARA TAB IYARIYO YOSE UKORESHEJE IZINA RYAYO:
     # =========================================================
     
-    # 1. Gusoma amakuru ya Form Responses 1
-    print("\n--- READING: FORM RESPONSES 1 ---")
+    # 1. Gusoma amakuru ya Form Responses
+    print("\n--- READING: FORM RESPONSES ---")
     df_form = read_as_table("Form Responses")
     if not df_form.empty:
         print(f"✅ Rows: {len(df_form)} | Columns: {len(df_form.columns)}")
         print(df_form.head(2))
 
-
-
-    # 2. Gusoma amakuru ya Daily Report
-    print("\n--- READING: DAILY REPORT ---")
-    df_daily = read_as_table("Daily Report")
+    # 2. Gusoma amakuru ya Copy of ibyagurishijwe (Nk'uko biri muri code yawe nshya)
+    print("\n--- READING: COPY OF IBYAGURISHIJWE ---")
+    df_daily = read_as_table("Copy of ibyagurishijwe", header_row=4, data_start_row=5)
     if not df_daily.empty:
         print(f"✅ Rows: {len(df_daily)} | Columns: {len(df_daily.columns)}")
-        print(df_daily.head(30))
+        print(df_daily.head(5))
