@@ -5,35 +5,86 @@ from datetime import datetime
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
+from reportlab.lib.units import inch
 import sheets_invetory_reader as sheets_reader 
 from helpers import *
 
-def create_daily_report(output_pdf="T&J_Daily_Report.pdf"):
+def create_daily_report(output_folder="reports"):
     print("🔄 Turafata amakuru muri Google Sheets (Daily Report)...")
-    df = sheets_reader.read_as_table("Daily Report")
+    
+    # ✅ HINDURA HANO GUSA: Izina rya Sheet ryafashe "Copy of ibyaguzwe" nk'uko wabivuze
+    df = sheets_reader.read_as_table("Copy of ibyaguzwe")
     
     if df.empty:
         print("❌ Nta makuru yabonetse.")
         return
 
-    # --- KUBIKA AMAKURU MURI CSV ---
-    if not os.path.exists("daily_reports"):
-        os.makedirs("daily_reports")
-        
-    uyu_munsi = datetime.now().strftime("%Y-%m-%d")
-    csv_filename = f"daily_reports/daily_{uyu_munsi}.csv"
+    # =========================================================
+    # 2. GUSHAKA ITARIKI MURI SHEET
+    # =========================================================
+    itariki_iri_muri_sheet = ""
     
-    # Kubika gusa imirongo y'ibicuruzwa (turengera TOTAL n'Imboga)
-    df_to_save = df[~df.iloc[:, 0].astype(str).str.upper().str.contains('TOTAL|IMBOGA|DETAILS|KWIZERA|UWIMANA|BIKOREWE', na=False)]
-    df_to_save.to_csv(csv_filename, index=False)
-    print(f"💾 Amakuru yabitswe muri: {csv_filename}")
+    for i in range(min(10, len(df))):
+        try:
+            possible_date_d = str(df.iloc[i, 3]).strip()
+            possible_date_c = str(df.iloc[i, 2]).strip()
+            
+            if "/" in possible_date_d and len(possible_date_d) >= 8:
+                datetime.strptime(possible_date_d.split(" ")[0], "%m/%d/%Y")
+                itariki_iri_muri_sheet = possible_date_d.split(" ")[0]
+                break
+            elif "/" in possible_date_c and len(possible_date_c) >= 8:
+                datetime.strptime(possible_date_c.split(" ")[0], "%m/%d/%Y")
+                itariki_iri_muri_sheet = possible_date_c.split(" ")[0]
+                break
+        except:
+            continue
 
-    # --- GUKORA PDF ---
+    if not itariki_iri_muri_sheet:
+        print("⚠️ Ntibyakunze kubona itariki muri Sheet. Turakoresha iy'uyu munsi.")
+        itariki_iri_muri_sheet = datetime.now().strftime("%m/%d/%Y")
+
+    print(f"📅 Itariki yabonetse: {itariki_iri_muri_sheet}")
+
+    # =========================================================
+    # 3. GUKORA SEARCH Y'UMUNSI
+    # =========================================================
+    try:
+        itariki_obj = datetime.strptime(itariki_iri_muri_sheet, "%m/%d/%Y")
+        umunsi_num = itariki_obj.weekday()
+        amazina_yiminsi = ["kuwambere", "kuwakabiri", "kuwagatatu", "kuwakane", "kuwagatanu", "kuwagatandatu", "kucyumweru"]
+        izina_ry_umunsi = amazina_yiminsi[umunsi_num]
+    except Exception as e:
+        print(f"⚠️ Ntibyakunye gukora search y'umunsi: {e}")
+        izina_ry_umunsi = "umunsi"
+
+    # =========================================================
+    # 4. GUTEGURA IZINA RYA FILE
+    # =========================================================
+    try:
+        itariki_fmt = datetime.strptime(itariki_iri_muri_sheet, "%m/%d/%Y").strftime("%Y-%m-%d")
+    except:
+        itariki_fmt = datetime.now().strftime("%Y-%m-%d")
+
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+        
+    output_pdf = f"{output_folder}/Daily_Report_{izina_ry_umunsi}_{itariki_fmt}.pdf"
+    csv_filename = f"{output_folder}/daily_{izina_ry_umunsi}_{itariki_fmt}.csv"
+    excel_filename = f"{output_folder}/Daily_Report_{izina_ry_umunsi}_{itariki_fmt}.xlsx"
+
+    print(f"✅ Umunsi wabonetse: {izina_ry_umunsi}")
+    print(f"💾 Izina rya PDF: Daily_Report_{izina_ry_umunsi}_{itariki_fmt}.pdf")
+    print(f"💾 Izina rya CSV: daily_{izina_ry_umunsi}_{itariki_fmt}.csv")
+    print(f"💾 Izina rya EXCEL: Daily_Report_{izina_ry_umunsi}_{itariki_fmt}.xlsx")
+
+    # =========================================================
+    # 5. GUKORA PDF
+    # =========================================================
     doc = SimpleDocTemplate(output_pdf, pagesize=A4, rightMargin=20, leftMargin=20, topMargin=20, bottomMargin=20)
     elements = [get_company_header(), Paragraph("<hr/>", styles['Normal']), Spacer(1, 2)]
     
-    uyu_munsi_fmt = datetime.now().strftime("%d/%m/%Y")
-    elements.append(Paragraph(f"<b>DAILY REPORT - RAPPORT UMUNSI WA {uyu_munsi_fmt}</b>", report_title_style))
+    elements.append(Paragraph(f"<b>DAILY REPORT - RAPPORT UMUNSI KUWA {itariki_iri_muri_sheet} ({izina_ry_umunsi.capitalize()})</b>", report_title_style))
 
     table_data = [["DETAILS", "QUANTITY", "UNITY PRICE", "TOTAL/RWF"]]
     table_styles = get_base_table_style()
@@ -41,10 +92,24 @@ def create_daily_report(output_pdf="T&J_Daily_Report.pdf"):
     row_num = 1 
     for index, row in df.iterrows():
         col1 = str(row.iloc[0]).strip()
-        if col1.upper() == "DETAILS" or col1 == "": continue
-        if "BIKOREWE" in col1.upper() or "KWIZERA" in col1.upper() or "UWIMANA" in col1.upper(): continue
-
         col2 = str(row.iloc[1]).strip() if len(row) > 1 else ""
+        
+        # GUKURAHO IMIRONGO YOSE ITARI IY'IBICURUZWA
+        if "T&J" in col1.upper() or "TIN" in col1.upper() or "TEL" in col1.upper() or "EMAIL" in col1.upper():
+            continue
+            
+        if "DAILY REPORT" in col1.upper() or "RAPPORT" in col1.upper() or "IBYUMWERU" in col1.upper():
+            continue
+            
+        if "DATE" in col1.upper() or "DATE" in col2.upper():
+            continue
+            
+        if "BIKOREWE" in col1.upper() or "KWIZERA" in col1.upper() or "UWIMANA" in col1.upper() or "TELLER" in col2.upper() or "MANAGING" in col2.upper():
+            continue
+            
+        if col1.upper() == "DETAILS" or col1 == "" or "TIMESTAMP" in col1.upper():
+            continue
+
         col3 = str(row.iloc[2]).strip() if len(row) > 2 else ""
         col4 = str(row.iloc[3]).strip() if len(row) > 3 else ""
 
@@ -72,8 +137,34 @@ def create_daily_report(output_pdf="T&J_Daily_Report.pdf"):
     elements.append(Spacer(1, 30)) 
     elements.append(get_signatures())
     
+    # 1. Kubaka dosiye ya PDF
     doc.build(elements)
     print(f"✅ PDF Y'UMUNSI YAKOZWE: {output_pdf}")
+
+    # =========================================================
+    # 🛠️ GUKORA EXCEL NA CSV (Zabitswe hano neza mbere ya return)
+    # =========================================================
+    mask = ~df.iloc[:, 0].astype(str).str.upper().str.contains(
+        'TOTAL|IMBOGA|DETAILS|KWIZERA|UWIMANA|BIKOREWE|T&J|TIN|DAILY REPORT|RAPPORT|DATE|IBYUMWERU', 
+        na=False
+    )
+    df_to_save = df[mask]
+
+    # Kubika CSV
+    df_to_save.to_csv(csv_filename, index=False)
+    print(f"✅ CSV YABITSWE MURI: {csv_filename}")
+
+    # Kubika Excel (.xlsx)
+    try:
+        df_to_save.to_excel(excel_filename, index=False, engine='openpyxl')
+        print(f"✅ EXCEL YABITSWE MURI: {excel_filename}")
+    except ImportError:
+        print("\n❌ IKOSA: Excel ntabwo yakozwe kuko mudasobwa yawe idafite 'openpyxl'.")
+        print("💡 Gukosora: Run-inga iri tegeko kuri terminal yawe: pip install openpyxl\n")
+    except Exception as e:
+        print(f"⚠️ Ikindi kibazo cyabaye kuri Excel: {e}")
+
+    return output_pdf
 
 if __name__ == "__main__":
     create_daily_report()
