@@ -129,11 +129,13 @@
         <!-- MOBILE MENU OVERLAY -->
         <div x-show="isMobileMenuOpen" @click="isMobileMenuOpen = false" class="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity"></div>
 
+        <!-- ========================================== -->
         <!-- SIDEBAR (Responsive) -->
+        <!-- ========================================== -->
         <aside :class="isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" class="absolute lg:relative z-50 w-72 h-full glass-panel border-r border-brand-border flex flex-col transition-transform duration-300 ease-in-out">
             
-            <!-- Header Area -->
-            <div class="min-h-[7rem] flex items-center justify-between lg:justify-start px-5 border-b border-brand-border/50 py-3">
+            <!-- Header Area (shrink-0 → never compressed) -->
+            <div class="min-h-[7rem] shrink-0 flex items-center justify-between lg:justify-start px-5 border-b border-brand-border/50 py-3">
                 <div class="flex items-center gap-4">
                     <!-- Logo Nini -->
                     <div class="w-14 h-14 rounded-xl bg-white flex items-center justify-center shadow-[0_0_15px_rgba(255,176,32,0.3)] overflow-hidden p-1.5 shrink-0">
@@ -144,7 +146,7 @@
                         <!-- Izina ryuzuye ry'ikigo -->
                         <h1 class="text-[14px] font-extrabold text-white leading-tight tracking-tight">T&J THINK BIG MINING COMPANY LTD</h1>
                         
-                        <!-- Amakuru ku murongo umwe (Horizontal) -->
+                        <!-- Amakuru ku murongo umwe -->
                         <div class="text-[10px] text-slate-400 mt-2 flex flex-col gap-1 font-medium">
                             <span class="flex items-center gap-1"><i class='bx bx-id-card text-brand-primary'></i> TIN: 121715003</span>
                             <span class="flex items-center gap-1"><i class='bx bx-phone text-brand-primary'></i> TEL: 0782992433</span>
@@ -159,8 +161,8 @@
                 </button>
             </div>
 
-            <!-- Nav Links -->
-            <nav class="flex-1 py-6 space-y-1 px-3 overflow-y-auto">
+            <!-- Nav Links (Scrollable, min-h-0 → fixes flexbox scroll bug) -->
+            <nav class="flex-1 min-h-0 py-6 space-y-1 px-3 overflow-y-auto">
                 <a href="#" class="flex items-center gap-3 px-3 py-3 rounded-lg bg-brand-primary/10 text-brand-primary border border-brand-primary/20 transition-all">
                     <i class='bx bxs-dashboard text-xl'></i>
                     <span class="font-semibold text-sm">Dashboard</span>
@@ -179,8 +181,8 @@
                 </a>
             </nav>
 
-            <!-- User Profile & Logout -->
-            <div class="p-4 border-t border-brand-border/50">
+            <!-- User Profile & Logout (shrink-0 → ALWAYS visible) -->
+            <div class="p-4 border-t border-brand-border/50 shrink-0">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 rounded-full bg-brand-card border border-brand-border flex items-center justify-center shrink-0">
@@ -220,6 +222,13 @@
                         <i class='bx bx-sync text-brand-primary animate-spin-slow' style="animation-duration: 3s;"></i>
                         <span class="text-xs font-medium text-slate-300">Sync: <span class="text-brand-primary font-bold" x-text="countdownText"></span></span>
                     </div>
+
+                    <!-- ✅ LOGOUT BUTTON (Mobile Only — always accessible) -->
+                    <button @click="logout()" 
+                            class="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-brand-danger/10 border border-brand-danger/30 text-brand-danger hover:bg-brand-danger/20 transition-colors"
+                            title="Logout">
+                        <i class='bx bx-log-out text-lg'></i>
+                    </button>
                     
                     <!-- Status -->
                     <div class="flex items-center gap-2 px-3 py-1.5 lg:px-4 lg:py-2 rounded-lg bg-brand-surface border border-brand-border">
@@ -276,12 +285,12 @@
                                 <p class="text-brand-danger font-semibold text-sm" x-text="errorMessage"></p>
                             </div>
 
-                            <!-- ✅ PDF Iframe (Iboneka gusa kuri Mudasobwa nini - Desktop) -->
+                            <!-- ✅ PDF Iframe (Desktop only) -->
                             <div x-show="previewPdfUrl && !loading && !downloading" class="hidden lg:flex flex-1 p-2">
                                 <iframe :src="previewPdfUrl" class="w-full h-full rounded-xl bg-white" frameborder="0"></iframe>
                             </div>
 
-                            <!-- ✅ Kuri Telefoni/Tablet, hagaragara buto zo gufungura cyangwa gukura -->
+                            <!-- ✅ Mobile fallback buttons -->
                             <div x-show="previewPdfUrl && !loading && !downloading" class="flex lg:hidden flex-1 flex-col items-center justify-center p-6 text-center">
                                 <div class="w-20 h-20 rounded-full bg-brand-info/10 flex items-center justify-center mb-4">
                                     <i class='bx bxs-file-pdf text-4xl text-brand-info'></i>
@@ -403,6 +412,7 @@
                 countdown: 300,
                 countdownText: '5:00',
                 cache: {},
+                countdownInterval: null,
 
                 async init() {
                     if(sessionStorage.getItem('isLoggedIn') === 'true') {
@@ -451,6 +461,7 @@
                 },
 
                 logout() {
+                    // Reset all state
                     this.isLoggedIn = false;
                     sessionStorage.removeItem('isLoggedIn');
                     sessionStorage.removeItem('userRole');
@@ -460,10 +471,21 @@
                     this.currentPreviewType = null;
                     this.cache = {};
                     this.isMobileMenuOpen = false;
+                    this.errorMessage = '';
+
+                    // Stop countdown timer if running
+                    if (this.countdownInterval) {
+                        clearInterval(this.countdownInterval);
+                        this.countdownInterval = null;
+                    }
                 },
 
                 startCountdown() {
-                    setInterval(() => {
+                    // Clear any existing interval to prevent duplicates
+                    if (this.countdownInterval) {
+                        clearInterval(this.countdownInterval);
+                    }
+                    this.countdownInterval = setInterval(() => {
                         if (this.countdown > 0) {
                             this.countdown--;
                         } else {
