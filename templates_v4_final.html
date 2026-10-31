@@ -34,7 +34,7 @@
 <!-- Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --gold: #FFB020;
@@ -43,22 +43,23 @@
     --bg: #0B1020;
     --surface: rgba(20, 26, 50, 0.55);
     --border: rgba(255, 255, 255, 0.08);
+    --slate-strong: #E2E8F0;       /* neutral KPI number color (dark mode) */
   }
   html, body {
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Roboto', Arial, Helvetica, 'Liberation Sans', sans-serif;
     background: var(--bg);
     color: #E8EAF0;
-    /* Medium base weight + antialiased smoothing = crisp, readable text on
-       dark glass surfaces (fixes the "very thin" look). */
-    font-weight: 500;
+    /* Bold base weight for maximum visibility (matches the bold-sans reference).
+       Antialiased smoothing keeps edges crisp on glass surfaces. */
+    font-weight: 700;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
-  .font-heading { font-family: 'Playfair Display', serif; font-weight: 700; }
-  .font-mono { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
-  /* Secondary/muted text keeps a readable weight instead of falling back to thin 400. */
-  .text-slate-400, .text-slate-500 { font-weight: 500; }
+  .font-heading { font-family: 'Roboto', Arial, Helvetica, sans-serif; font-weight: 900; letter-spacing: -0.01em; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+  /* Secondary/muted text stays readable-bold instead of thin. */
+  .text-slate-400, .text-slate-500 { font-weight: 700; }
   /* Bold up KPI values, table figures and important numbers by default. */
   .font-mono { letter-spacing: -0.01em; }
 
@@ -97,13 +98,19 @@
     backdrop-filter: blur(18px) saturate(140%);
     -webkit-backdrop-filter: blur(18px) saturate(140%);
     border: 1px solid var(--border);
-    border-radius: 18px;
+    border-radius: 16px;                 /* modern soft corners */
+    box-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 6px 20px -12px rgba(15,23,42,0.15);
   }
   .glass-strong {
     background: rgba(15, 20, 42, 0.85);
     backdrop-filter: blur(28px);
     border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(15,23,42,0.10), 0 12px 36px -16px rgba(15,23,42,0.22);
   }
+  /* Glass cards used for content panels get extra internal padding so
+     charts/tables breathe (Fix 2: whitespace). */
+  .glass.p-4 { padding: 1.25rem; }
 
   .brand-gold   { color: var(--gold); }
   .brand-emerald{ color: var(--emerald); }
@@ -146,6 +153,77 @@
   .card-hover { transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
   .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 32px -8px rgba(0,0,0,0.5); border-color: rgba(255,176,32,0.3); }
 
+  /* ============================================================
+     KPI CARD — premium dashboard styling (Fixes 1,2,3,4 combined)
+     Strong visual hierarchy: small light label → huge bold number
+     → tiny muted sub. Generous padding lets the data breathe.
+     Rounded 16px + soft float shadow = modern elevation.
+     ============================================================ */
+  .kpi-card {
+    padding: 1.25rem 1.35rem;          /* generous breathing room */
+    border-radius: 16px;               /* modern, soft corners */
+    box-shadow: 0 1px 3px rgba(15,23,42,0.08), 0 8px 24px -12px rgba(15,23,42,0.18);
+  }
+  .kpi-card:hover {
+    box-shadow: 0 4px 12px rgba(15,23,42,0.10), 0 16px 40px -14px rgba(15,23,42,0.22);
+  }
+  /* Label: small, bold, muted slate (NOT the number's color) */
+  .kpi-label {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #94A3B8;                    /* muted gray label */
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+  /* Number: HUGE + black weight — maximum visibility (the star of the card) */
+  .kpi-value {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 1.9rem;                 /* big, scannable */
+    font-weight: 900;                  /* black = boldest, max visibility */
+    line-height: 1.1;                  /* tight for big numbers */
+    letter-spacing: -0.02em;
+  }
+  @media (min-width: 768px) {
+    .kpi-value { font-size: 2.15rem; } /* even bigger on tablet/desktop */
+  }
+  /* Sub-label: tiny, bold, muted */
+  .kpi-sub {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #64748B;
+    line-height: 1.3;
+  }
+  /* Icon chip: contained, not floating raw */
+  .kpi-icon {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    font-size: 1.05rem;
+  }
+  html.light .kpi-icon { background: rgba(15,23,42,0.05); }
+  html.light .kpi-label { color: #475569; font-weight: 700; }
+  html.light .kpi-sub { color: #475569; font-weight: 700; }
+  html.light .kpi-card {
+    box-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 8px 24px -14px rgba(15,23,42,0.14);
+  }
+  html.light .kpi-card:hover {
+    box-shadow: 0 4px 12px rgba(15,23,42,0.08), 0 16px 40px -14px rgba(15,23,42,0.20);
+  }
+
+  /* Chart panel titles — neutral slate, bold Roboto. Color is reserved for
+     the data inside the chart, not the chrome around it. */
+  .chart-title {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 0.88rem;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: #CBD5E1;
+    margin-bottom: 0.75rem;
+  }
+  html.light .chart-title { color: #334155; }
+
   /* KPI highlight pulse for emphasis on active metric cards */
   @keyframes highlight-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,176,32,0); } 50% { box-shadow: 0 0 20px -5px rgba(255,176,32,0.3); } }
   .kpi-highlight { animation: highlight-pulse 3s ease-in-out infinite; }
@@ -164,12 +242,13 @@
   .nav-item {
     display: flex; align-items: center; gap: 0.6rem;
     padding: 0.65rem 0.9rem; border-radius: 12px; cursor: pointer;
-    color: #CBD5E1; font-weight: 500; transition: all .15s ease;
+    color: #CBD5E1; font-weight: 700; transition: all .15s ease;
   }
   .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
   .nav-item.active {
     background: linear-gradient(135deg, rgba(255,176,32,0.15), rgba(168,85,247,0.15));
     color: #fff; border: 1px solid rgba(255,176,32,0.3);
+    font-weight: 900;
   }
 
   /* Scrollbar */
@@ -177,11 +256,11 @@
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-  table thead th { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #CBD5E1; }
-  table tbody td { font-size: 0.9rem; font-weight: 500; }
+  table thead th { font-size: 0.78rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; color: #CBD5E1; }
+  table tbody td { font-size: 0.9rem; font-weight: 700; }
 
   .badge {
-    padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 600;
+    padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 900;
   }
   .badge-success { background: rgba(0,229,153,0.15); color: #00E599; }
   .badge-danger  { background: rgba(239,68,68,0.15); color: #FCA5A5; }
@@ -201,25 +280,25 @@
     --gold: #B8740A;
     --emerald: #00875A;
     --purple: #7C3AED;
+    --slate-strong: #1E293B;       /* neutral KPI number color (light mode) */
   }
-  html.light body { color: #1A2440; }
-  /* LIGHT MODE = bolder text for visibility on white. Dark-on-white at
-     medium weight can look thin, so bump body to semibold (600) and key
-     UI surfaces to bold (700). Numbers/figures stay crisp at 600. */
-  html.light body { font-weight: 600; }
-  html.light .font-heading { font-weight: 800; }          /* Playfair: extra-bold */
-  html.light .font-mono { font-weight: 600; }              /* figures / KPI values */
+  html.light body { color: #0A0E1A; }            /* near-black on white = max contrast */
+  /* LIGHT MODE = bold/black weights for max visibility (matches the bold-sans
+     reference: high-contrast bold text on a light background). */
+  html.light body { font-weight: 700; }
+  html.light .font-heading { font-weight: 900; }          /* Roboto: black */
+  html.light .font-mono { font-weight: 700; }             /* figures / KPI values */
   html.light .text-slate-200,
   html.light .text-slate-300,
   html.light .text-slate-400,
   html.light .text-slate-500,
-  html.light .text-slate-600 { font-weight: 600 !important; } /* muted labels */
-  html.light .nav-item { font-weight: 600; }               /* sidebar links */
-  html.light .nav-item.active { font-weight: 700; }        /* current page */
-  html.light table thead th { font-weight: 700; }          /* table headers bold */
-  html.light table tbody td { font-weight: 600; }          /* table body semibold */
-  html.light .badge { font-weight: 700; }                  /* status pills */
-  html.light .btn-ghost { font-weight: 600; }
+  html.light .text-slate-600 { font-weight: 700 !important; color: #1E293B !important; } /* muted labels still bold-dark */
+  html.light .nav-item { font-weight: 700; }              /* sidebar links */
+  html.light .nav-item.active { font-weight: 900; }       /* current page */
+  html.light table thead th { font-weight: 900; }         /* table headers black */
+  html.light table tbody td { font-weight: 700; }         /* table body bold */
+  html.light .badge { font-weight: 900; }                 /* status pills black */
+  html.light .btn-ghost { font-weight: 700; }
   /* Inputs stay medium so typed text is clean (not heavy). */
   html.light .input { font-weight: 500; }
   html.light .input::placeholder { font-weight: 500; }
@@ -469,7 +548,7 @@
          :class="{ 'open': sidebarOpen }">
       <!-- Issue 5: shared sidebar header — both Owner & Employee see the
            same logo + company details block. -->
-      <div class="flex items-center gap-2 mb-4 px-2">
+      <div class="flex items-center gap-3 mb-5 px-2">
         <!-- Real company logo with graceful fallback to diamond icon -->
         <img x-show="logoOk" src="/static/logo.png" alt="T&J Logo" class="w-10 h-10 object-contain" @error="logoOk=false">
         <div x-show="!logoOk" x-cloak class="w-10 h-10 rounded-xl bg-brand-gold flex items-center justify-center">
@@ -477,7 +556,7 @@
         </div>
         <div class="min-w-0">
           <div class="font-heading text-sm brand-gold leading-tight">T&J THINK BIG MINING</div>
-          <div class="text-[10px] text-slate-500">MINING ENTERPRISE OS</div>
+          <div class="text-[10px] text-slate-500 mt-0.5">MINING ENTERPRISE OS</div>
         </div>
       </div>
       <!-- Company contact details (TIN / TEL / EMAIL) shared by everyone -->
@@ -553,16 +632,17 @@
         <!-- =================== OWNER: DASHBOARD =================== -->
         <template x-if="isOwner && page==='dashboard'">
           <div class="space-y-6">
-            <!-- KPI cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 kpi-grid">
+            <!-- KPI cards — strong visual hierarchy: small light label on top,
+                 huge bold number in the middle, tiny muted sub below. -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 kpi-grid">
               <template x-for="(k,i) in kpiCards" :key="i">
-                <div class="glass p-4 card-hover kpi-highlight">
-                  <div class="flex items-center justify-between">
-                    <div class="text-xs text-slate-400" x-text="k.label"></div>
-                    <i :class="k.icon" class="text-xl" :style="`color:${k.color}`"></i>
+                <div class="glass kpi-card card-hover">
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="kpi-label" x-text="k.label"></span>
+                    <span class="kpi-icon" :style="`color:${k.color}`"><i :class="k.icon"></i></span>
                   </div>
-                  <div class="mt-2 font-mono text-xl md:text-2xl font-semibold" :style="`color:${k.color}`" x-text="k.value"></div>
-                  <div class="text-[10px] text-slate-500 mt-1" x-text="k.sub"></div>
+                  <div class="kpi-value" :style="`color:${k.color}`" x-text="k.value"></div>
+                  <div class="kpi-sub mt-2" x-text="k.sub"></div>
                 </div>
               </template>
             </div>
@@ -570,19 +650,19 @@
             <!-- Charts -->
             <div class="grid md:grid-cols-2 gap-4">
               <div class="glass p-4">
-                <h3 class="font-heading text-sm mb-2 brand-gold">Sales — Last 7 Days</h3>
+                <h3 class="chart-title">Sales — Last 7 Days</h3>
                 <canvas id="chartSales7" height="160"></canvas>
               </div>
               <div class="glass p-4">
-                <h3 class="font-heading text-sm mb-2 brand-emerald">Profit Trend</h3>
+                <h3 class="chart-title">Profit Trend</h3>
                 <canvas id="chartProfit" height="160"></canvas>
               </div>
               <div class="glass p-4">
-                <h3 class="font-heading text-sm mb-2 brand-purple">Top Products</h3>
+                <h3 class="chart-title">Top Products</h3>
                 <canvas id="chartTopProducts" height="160"></canvas>
               </div>
               <div class="glass p-4">
-                <h3 class="font-heading text-sm mb-2 brand-gold">Sales by Category</h3>
+                <h3 class="chart-title">Sales by Category</h3>
                 <canvas id="chartCategory" height="160"></canvas>
               </div>
             </div>
@@ -772,19 +852,19 @@
         <template x-if="isOwner && page==='analytics'">
           <div class="grid md:grid-cols-2 gap-4">
             <div class="glass p-4">
-              <h3 class="font-heading text-sm mb-2 brand-gold">Sales — Last 7 Days</h3>
+              <h3 class="chart-title">Sales — Last 7 Days</h3>
               <canvas id="chartSales7a" height="200"></canvas>
             </div>
             <div class="glass p-4">
-              <h3 class="font-heading text-sm mb-2 brand-emerald">Profit Trend</h3>
+              <h3 class="chart-title">Profit Trend</h3>
               <canvas id="chartProfitA" height="200"></canvas>
             </div>
             <div class="glass p-4">
-              <h3 class="font-heading text-sm mb-2 brand-purple">Top Products</h3>
+              <h3 class="chart-title">Top Products</h3>
               <canvas id="chartTopProductsA" height="200"></canvas>
             </div>
             <div class="glass p-4">
-              <h3 class="font-heading text-sm mb-2 brand-gold">Sales by Category</h3>
+              <h3 class="chart-title">Sales by Category</h3>
               <canvas id="chartCategoryA" height="200"></canvas>
             </div>
           </div>
@@ -1450,7 +1530,7 @@
 
             <!-- Saved carts -->
             <div class="glass p-4" x-show="savedCarts.length>0">
-              <h3 class="font-heading text-sm mb-2 brand-purple">Carts zabitse (Saved Carts)</h3>
+              <h3 class="chart-title">Carts zabitse (Saved Carts)</h3>
               <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
                 <template x-for="(c,i) in savedCarts" :key="i">
                   <div class="glass p-3">
@@ -2055,14 +2135,14 @@ function tjApp() {
     get kpiCards() {
       const k = this.kpis || {};
       return [
-        { label:'Total Products', value:this.fmt(k.total_products), sub:'In stock', icon:'bx bx-package', color:'var(--gold)' },
-        { label:"Today's Sales", value:this.fmtMoney(k.todays_sales), sub:`${k.todays_transactions||0} tx`, icon:'bx bx-cart', color:'var(--emerald)' },
-        { label:"Today's Profit", value:this.fmtMoney(k.todays_profit), sub:'Net', icon:'bx bx-line-chart', color:'var(--purple)' },
-        { label:'Stock Value', value:this.fmtMoney(k.stock_value), sub:`Cost ${this.fmtMoney(k.stock_cost)}`, icon:'bx bx-box', color:'var(--gold)' },
-        { label:'Total Sales', value:this.fmtMoney(k.total_sales), sub:'All time', icon:'bx bx-dollar-circle', color:'var(--emerald)' },
-        { label:'Total Profit', value:this.fmtMoney(k.total_profit), sub:'All time', icon:'bx bx-trending-up', color:'var(--purple)' },
-        { label:'Service Clients', value:this.fmt(k.total_svc_clients), sub:`Rev ${this.fmtMoney(k.total_svc_revenue)}`, icon:'bx bx-group', color:'var(--gold)' },
-        { label:'Active Employees', value:this.fmt(k.active_employees), sub:'Working', icon:'bx bx-user-check', color:'var(--emerald)' },
+        { label:'Total Products', value:this.fmt(k.total_products), sub:'In stock', icon:'bx bx-package', color:'var(--slate-strong)' },
+        { label:"Today's Sales", value:this.fmtMoney(k.todays_sales), sub:`${k.todays_transactions||0} tx`, icon:'bx bx-cart', color:'var(--slate-strong)' },
+        { label:"Today's Profit", value:this.fmtMoney(k.todays_profit), sub:'Net', icon:'bx bx-line-chart', color:'var(--emerald)' },
+        { label:'Stock Value', value:this.fmtMoney(k.stock_value), sub:`Cost ${this.fmtMoney(k.stock_cost)}`, icon:'bx bx-box', color:'var(--slate-strong)' },
+        { label:'Total Sales', value:this.fmtMoney(k.total_sales), sub:'All time', icon:'bx bx-dollar-circle', color:'var(--slate-strong)' },
+        { label:'Total Profit', value:this.fmtMoney(k.total_profit), sub:'All time', icon:'bx bx-trending-up', color:'var(--emerald)' },
+        { label:'Service Clients', value:this.fmt(k.total_svc_clients), sub:`Rev ${this.fmtMoney(k.total_svc_revenue)}`, icon:'bx bx-group', color:'var(--slate-strong)' },
+        { label:'Active Employees', value:this.fmt(k.active_employees), sub:'Working', icon:'bx bx-user-check', color:'var(--slate-strong)' },
       ];
     },
     get filteredProducts() {
@@ -2170,6 +2250,9 @@ function tjApp() {
         document.documentElement.classList.remove('light');
       }
       try { localStorage.setItem('tj-theme', this.theme); } catch (e) {}
+      // Re-render charts with the new theme's palette (colors read live from
+      // CSS vars at render time, so a toggle needs a redraw to take effect).
+      this.$nextTick(() => { try { this.renderCharts(); } catch (e) {} });
     },
 
     // ---- auth ----
@@ -3531,16 +3614,49 @@ function tjApp() {
     // ---- charts ----
     _chartRefs: {},
     renderCharts() {
-      const colors = {
-        gold:'#FFB020', emerald:'#00E599', purple:'#A855F7',
-        grid:'rgba(255,255,255,0.06)', text:'#94A3B8'
+      // Theme-aware palette: read computed CSS vars so charts match the
+      // active theme. Emerald is the single "growth" accent; everything
+      // else is neutral slate. (Fix 3: restricted palette.)
+      const css = getComputedStyle(document.documentElement);
+      const emerald = (css.getPropertyValue('--emerald').trim() || '#00E599');
+      const slate = (css.getPropertyValue('--slate-strong').trim() || '#E2E8F0');
+      const isLight = document.documentElement.classList.contains('light');
+      const grid = isLight ? 'rgba(15,23,42,0.06)' : 'rgba(255,255,255,0.05)';
+      const tickText = isLight ? '#64748B' : '#94A3B8';
+      const axisColor = isLight ? '#94A3B8' : '#CBD5E1';
+
+      const colors = { emerald, slate, grid, text: tickText };
+
+      // Build a vertical transparent gradient that fades the fill colour into
+      // the background — modern "dissolve" effect instead of a flat block.
+      // (Fix 5: transparent gradient fade under the line.)
+      const fadeGradient = (ctx, hex) => {
+        const chart = ctx.chart;
+        const { ctx: c, chartArea } = chart;
+        if (!chartArea) return hex + '20';
+        const g = c.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
+        g.addColorStop(0, hex + '59');   // ~35% opacity at top (near line)
+        g.addColorStop(1, hex + '00');   // fully transparent at bottom
+        return g;
       };
+
       const baseOpts = (yLabel='') => ({
         responsive:true, maintainAspectRatio:false,
-        plugins:{ legend:{ labels:{ color:colors.text, font:{size:10} } } },
+        animation:{ duration:700, easing:'easeOutQuart' },
+        plugins:{
+          legend:{ labels:{ color:colors.text, font:{family:"'Roboto',Arial,sans-serif", size:11, weight:'700'}, usePointStyle:true, pointStyle:'circle', boxWidth:8 } },
+          tooltip:{
+            backgroundColor: isLight ? 'rgba(255,255,255,0.95)' : 'rgba(15,20,42,0.95)',
+            titleColor: axisColor, bodyColor: axisColor,
+            borderColor: isLight ? 'rgba(15,23,42,0.10)' : 'rgba(255,255,255,0.10)',
+            borderWidth:1, cornerRadius:8, padding:10,
+            titleFont:{family:"'Roboto',Arial,sans-serif", weight:'900'},
+            bodyFont:{family:"'Roboto',Arial,sans-serif"}
+          }
+        },
         scales:{
-          x:{ ticks:{color:colors.text, font:{size:9}}, grid:{color:colors.grid} },
-          y:{ ticks:{color:colors.text, font:{size:9}}, grid:{color:colors.grid}, title:{display:!!yLabel,text:yLabel,color:colors.text} }
+          x:{ ticks:{color:colors.text, font:{family:"'Roboto',Arial,sans-serif", size:10}}, grid:{display:false}, border:{color:grid} },
+          y:{ ticks:{color:colors.text, font:{family:"'Roboto',Arial,sans-serif", size:10}}, grid:{color:colors.grid}, border:{display:false}, title:{display:!!yLabel,text:yLabel,color:colors.text} }
         }
       });
 
@@ -3552,7 +3668,11 @@ function tjApp() {
           type:'bar',
           data:{
             labels: data.map(d=>d.date||d.name),
-            datasets:[{ label:'Value', data:data.map(d=>d.value), backgroundColor:color, borderRadius:4 }]
+            datasets:[{ label:'Value', data:data.map(d=>d.value),
+              backgroundColor: color, hoverBackgroundColor: color,
+              borderRadius: 8,           // rounded bar tops (Fix 5)
+              borderSkipped: false,
+              maxBarThickness: 42 }]
           },
           options: baseOpts()
         });
@@ -3566,7 +3686,20 @@ function tjApp() {
           type:'line',
           data:{
             labels: data.map(d=>d.date||d.name),
-            datasets:[{ label:'Value', data:data.map(d=>d.value), borderColor:color, backgroundColor:color+'33', tension:0.35, fill:true, pointRadius:3 }]
+            datasets:[{
+              label:'Value', data:data.map(d=>d.value),
+              borderColor: color,
+              backgroundColor: (ctx)=>fadeGradient(ctx, color),
+              tension: 0.4,             // smooth cubic-bezier curve (Fix 5)
+              fill: true,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              pointBackgroundColor: color,
+              pointBorderColor: isLight ? '#fff' : '#0B1020',
+              pointBorderWidth: 1.5,
+              borderWidth: 2.5,
+              cubicInterpolationMode: 'monotone'   // prevents overshoot on sharp data
+            }]
           },
           options: baseOpts()
         });
@@ -3576,16 +3709,29 @@ function tjApp() {
         const el = document.getElementById(id);
         if (!el) return;
         if (this._chartRefs[id]) this._chartRefs[id].destroy();
-        const palette = ['#FFB020','#00E599','#A855F7','#38BDF8','#FB7185','#FACC15','#34D399'];
+        // Restricted palette: emerald-led, then neutral slate shades — no
+        // rainbow of primaries. (Fix 3.)
+        const palette = isLight
+          ? ['#00875A','#1E293B','#64748B','#94A3B8','#CBD5E1','#A1A1AA','#52525B']
+          : ['#00E599','#E2E8F0','#94A3B8','#64748B','#475569','#334155','#CBD5E1'];
         this._chartRefs[id] = new Chart(el, {
           type:'doughnut',
           data:{
             labels: data.map(d=>d.name||d.date),
-            datasets:[{ data:data.map(d=>d.value), backgroundColor:palette }]
+            datasets:[{ data:data.map(d=>d.value),
+              backgroundColor: palette,
+              borderColor: isLight ? '#fff' : 'rgba(15,20,42,0.6)',
+              borderWidth: 2,
+              hoverOffset: 6 }]
           },
           options:{
             responsive:true, maintainAspectRatio:false,
-            plugins:{ legend:{ labels:{color:colors.text, font:{size:10}} } }
+            cutout: '62%',
+            plugins:{ legend:{ position:'right', labels:{color:colors.text, font:{family:"'Roboto',Arial,sans-serif", size:11, weight:'700'}, usePointStyle:true, pointStyle:'circle', boxWidth:8, padding:10} } },
+            tooltip:{
+              backgroundColor: isLight ? 'rgba(255,255,255,0.95)' : 'rgba(15,20,42,0.95)',
+              titleColor: axisColor, bodyColor: axisColor, cornerRadius:8, padding:10
+            }
           }
         });
       };
@@ -3595,14 +3741,16 @@ function tjApp() {
       const tp = this.charts.top_products || [];
       const cat = this.charts.sales_by_category || [];
 
-      renderBar('chartSales7', s7, colors.gold);
+      // Sales + Top Products use neutral slate (counts/volume); Profit uses
+      // the single emerald growth accent.
+      renderBar('chartSales7', s7, colors.slate);
       renderLine('chartProfit', pf, colors.emerald);
-      renderBar('chartTopProducts', tp, colors.purple);
+      renderBar('chartTopProducts', tp, colors.slate);
       renderPie('chartCategory', cat);
 
-      renderBar('chartSales7a', s7, colors.gold);
+      renderBar('chartSales7a', s7, colors.slate);
       renderLine('chartProfitA', pf, colors.emerald);
-      renderBar('chartTopProductsA', tp, colors.purple);
+      renderBar('chartTopProductsA', tp, colors.slate);
       renderPie('chartCategoryA', cat);
     }
   };
