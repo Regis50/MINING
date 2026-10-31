@@ -187,6 +187,97 @@
   .badge-danger  { background: rgba(239,68,68,0.15); color: #FCA5A5; }
   .badge-gold    { background: rgba(255,176,32,0.15); color: #FFB020; }
 
+  /* ============================================================
+     LIGHT MODE — complementary palette for readable text on light.
+     Triggered by <html class="light"> (set from localStorage).
+     Brand accents are deepened (amber/green/purple) so coloured
+     text stays legible on white; muted slate text is inverted to
+     dark slate; glass becomes translucent white with soft shadow.
+     ============================================================ */
+  html.light {
+    --bg: #EEF1F7;
+    --surface: rgba(255, 255, 255, 0.72);
+    --border: rgba(15, 23, 42, 0.10);
+    --gold: #B8740A;
+    --emerald: #00875A;
+    --purple: #7C3AED;
+  }
+  html.light body { color: #1A2440; }
+  /* Soft pastel animated background instead of the dark gradient. */
+  html.light .animated-bg {
+    background: linear-gradient(125deg, #EEF1F7 0%, #F3EEFB 25%, #F7EEF3 50%, #EAF6F1 75%, #EEF1F7 100%);
+    background-size: 400% 400%;
+  }
+  html.light .bg-orbs::before { background: #FFD27A; opacity: 0.22; }
+  html.light .bg-orbs::after  { background: #C4A8FF; opacity: 0.22; }
+  /* Glass panels → translucent white with a soft shadow for depth. */
+  html.light .glass {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 4px 24px -10px rgba(15, 23, 42, 0.12);
+  }
+  html.light .glass-strong {
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    box-shadow: 0 10px 44px -14px rgba(15, 23, 42, 0.22);
+  }
+  /* Sidebar navigation: dark slate text on white. */
+  html.light .nav-item { color: #475569; }
+  html.light .nav-item:hover { background: rgba(15, 23, 42, 0.06); color: #0B1020; }
+  html.light .nav-item.active {
+    background: linear-gradient(135deg, rgba(184,116,10,0.12), rgba(124,58,237,0.12));
+    color: #0B1020; border: 1px solid rgba(184,116,10,0.35);
+  }
+  /* Inputs: white field, dark text. */
+  html.light .input {
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    color: #0B1020;
+  }
+  html.light .input::placeholder { color: #94A3B8; }
+  html.light .input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(184,116,10,0.18); }
+  /* Ghost buttons: light fill, dark text. */
+  html.light .btn-ghost {
+    background: rgba(15, 23, 42, 0.04);
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    color: #1A2440;
+  }
+  html.light .btn-ghost:hover { background: rgba(15, 23, 42, 0.08); }
+  /* Card hover shadow softer on light. */
+  html.light .card-hover:hover { box-shadow: 0 12px 32px -10px rgba(15, 23, 42, 0.20); border-color: rgba(184,116,10,0.40); }
+  /* Badges: deepened colours for legibility on white. */
+  html.light .badge-success { background: rgba(0,135,90,0.12); color: #00875A; }
+  html.light .badge-danger  { background: rgba(220,38,38,0.12); color: #DC2626; }
+  html.light .badge-gold    { background: rgba(184,116,10,0.14); color: #B8740A; }
+  /* Tables: dark header + body text. */
+  html.light table thead th { color: #475569; }
+  html.light table tbody td { color: #1A2440; }
+  /* Modal backdrop a touch lighter. */
+  html.light .modal-backdrop { background: rgba(15, 23, 42, 0.42); }
+  /* Scrollbar darker on light. */
+  html.light ::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.18); }
+  html.light ::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.30); }
+  /* Invert Tailwind muted slate text → dark slate (keeps readable weight). */
+  html.light .text-slate-200 { color: #1E293B !important; }
+  html.light .text-slate-300 { color: #334155 !important; }
+  html.light .text-slate-400 { color: #475569 !important; }
+  html.light .text-slate-500 { color: #64748B !important; }
+  html.light .text-slate-600 { color: #475569 !important; }
+  /* Borders styled as white/translucent → switch to subtle dark hairlines. */
+  html.light [class*="border-white/"] { border-color: rgba(15, 23, 42, 0.10) !important; }
+  /* Translucent white fills (bg-white/...) → very light slate so panels read. */
+  html.light [class*="bg-white/"] { background-color: rgba(241, 245, 249, 0.7) !important; }
+  /* Hover-white text (eye icon, toast close) would vanish on white → go dark. */
+  html.light .hover\:text-white:hover { color: #0B1020 !important; }
+  /* Theme toggle button itself stays readable in both themes. */
+  .theme-toggle { display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 10px; cursor: pointer;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+    color: #E8EAF0; transition: all .15s ease; }
+  .theme-toggle:hover { background: rgba(255,255,255,0.12); }
+  html.light .theme-toggle { background: rgba(15,23,42,0.05); border-color: rgba(15,23,42,0.12); color: #1A2440; }
+  html.light .theme-toggle:hover { background: rgba(15,23,42,0.10); }
+
   /* Mobile + Tablet portrait: hide sidebar off-canvas, show via hamburger.
      Uses 1023px so tablets in portrait (768–1023px) get the Android-like
      slide-out sidebar instead of the always-visible desktop sidebar. */
@@ -274,6 +365,17 @@
     .nav-item { padding: 0.7rem 0.5rem !important; font-size: 0.95rem !important; }
   }
 </style>
+<!-- Apply saved theme BEFORE render to prevent a flash of the wrong theme.
+     Defaults to dark; 'light' class on <html> switches the palette. -->
+<script>
+  (function () {
+    try {
+      if ((localStorage.getItem('tj-theme') || 'dark') === 'light') {
+        document.documentElement.classList.add('light');
+      }
+    } catch (e) {}
+  })();
+</script>
 </head>
 <body x-data="tjApp()" x-init="init()" :class="{ 'overflow-hidden': anyModalOpen }">
 <div class="animated-bg"></div>
@@ -282,6 +384,13 @@
 <!-- =================== LOGIN SCREEN =================== -->
 <template x-if="!user">
   <div class="min-h-screen flex items-center justify-center p-4">
+    <!-- Theme toggle available on the login screen too (top-right corner). -->
+    <button class="theme-toggle fixed top-4 right-4 z-40" @click="toggleTheme()"
+            :title="theme === 'light' ? 'Hindura (Dark mode)' : 'Hindura (Light mode)'"
+            :aria-label="theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'">
+      <i class='bx bx-sun text-lg' x-show="theme==='dark'"></i>
+      <i class='bx bx-moon text-lg' x-show="theme==='light'" x-cloak></i>
+    </button>
     <div class="glass glass-strong w-full max-w-md p-8 card-hover">
       <div class="text-center mb-6">
         <!-- Real company logo on login screen (with graceful diamond fallback) -->
@@ -407,6 +516,13 @@
             <i class='bx bx-time'></i>
             <span x-text="clock"></span>
           </span>
+          <button class="theme-toggle" @click="toggleTheme()"
+                  :title="theme === 'light' ? 'Hindura (Dark mode)' : 'Hindura (Light mode)'"
+                  :aria-label="theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'">
+            <!-- Sun shown in DARK mode (click → go light); Moon shown in LIGHT mode -->
+            <i class='bx bx-sun text-lg' x-show="theme==='dark'"></i>
+            <i class='bx bx-moon text-lg' x-show="theme==='light'" x-cloak></i>
+          </button>
           <span class="badge badge-gold" x-text="isOwner ? 'OWNER' : 'EMPLOYEE'"></span>
         </div>
       </header>
@@ -1802,6 +1918,8 @@ function tjApp() {
     loginForm: { username: '', password: '' },
     page: 'dashboard',
     sidebarOpen: false,
+    // 'dark' (default) or 'light'. Synced to <html class="light"> + localStorage('tj-theme').
+    theme: (document.documentElement.classList.contains('light')) ? 'light' : 'dark',
     clock: '',
     todayLabel: '',
     busy: false,
@@ -1915,14 +2033,14 @@ function tjApp() {
     get kpiCards() {
       const k = this.kpis || {};
       return [
-        { label:'Total Products', value:this.fmt(k.total_products), sub:'In stock', icon:'bx bx-package', color:'#FFB020' },
-        { label:"Today's Sales", value:this.fmtMoney(k.todays_sales), sub:`${k.todays_transactions||0} tx`, icon:'bx bx-cart', color:'#00E599' },
-        { label:"Today's Profit", value:this.fmtMoney(k.todays_profit), sub:'Net', icon:'bx bx-line-chart', color:'#A855F7' },
-        { label:'Stock Value', value:this.fmtMoney(k.stock_value), sub:`Cost ${this.fmtMoney(k.stock_cost)}`, icon:'bx bx-box', color:'#FFB020' },
-        { label:'Total Sales', value:this.fmtMoney(k.total_sales), sub:'All time', icon:'bx bx-dollar-circle', color:'#00E599' },
-        { label:'Total Profit', value:this.fmtMoney(k.total_profit), sub:'All time', icon:'bx bx-trending-up', color:'#A855F7' },
-        { label:'Service Clients', value:this.fmt(k.total_svc_clients), sub:`Rev ${this.fmtMoney(k.total_svc_revenue)}`, icon:'bx bx-group', color:'#FFB020' },
-        { label:'Active Employees', value:this.fmt(k.active_employees), sub:'Working', icon:'bx bx-user-check', color:'#00E599' },
+        { label:'Total Products', value:this.fmt(k.total_products), sub:'In stock', icon:'bx bx-package', color:'var(--gold)' },
+        { label:"Today's Sales", value:this.fmtMoney(k.todays_sales), sub:`${k.todays_transactions||0} tx`, icon:'bx bx-cart', color:'var(--emerald)' },
+        { label:"Today's Profit", value:this.fmtMoney(k.todays_profit), sub:'Net', icon:'bx bx-line-chart', color:'var(--purple)' },
+        { label:'Stock Value', value:this.fmtMoney(k.stock_value), sub:`Cost ${this.fmtMoney(k.stock_cost)}`, icon:'bx bx-box', color:'var(--gold)' },
+        { label:'Total Sales', value:this.fmtMoney(k.total_sales), sub:'All time', icon:'bx bx-dollar-circle', color:'var(--emerald)' },
+        { label:'Total Profit', value:this.fmtMoney(k.total_profit), sub:'All time', icon:'bx bx-trending-up', color:'var(--purple)' },
+        { label:'Service Clients', value:this.fmt(k.total_svc_clients), sub:`Rev ${this.fmtMoney(k.total_svc_revenue)}`, icon:'bx bx-group', color:'var(--gold)' },
+        { label:'Active Employees', value:this.fmt(k.active_employees), sub:'Working', icon:'bx bx-user-check', color:'var(--emerald)' },
       ];
     },
     get filteredProducts() {
@@ -2017,6 +2135,19 @@ function tjApp() {
       const d = new Date();
       this.clock = d.toLocaleTimeString();
       this.todayLabel = d.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    },
+
+    // Switch between dark and light theme. Persisted to localStorage so the
+    // choice survives reloads; the <html class="light"> flag is what the CSS
+    // keys off (and the anti-FOUC script in <head> applies it pre-render).
+    toggleTheme() {
+      this.theme = (this.theme === 'light') ? 'dark' : 'light';
+      if (this.theme === 'light') {
+        document.documentElement.classList.add('light');
+      } else {
+        document.documentElement.classList.remove('light');
+      }
+      try { localStorage.setItem('tj-theme', this.theme); } catch (e) {}
     },
 
     // ---- auth ----
