@@ -195,7 +195,7 @@
      dark slate; glass becomes translucent white with soft shadow.
      ============================================================ */
   html.light {
-    --bg: #EEF1F7;
+    --bg: #E5E7EB;
     --surface: rgba(255, 255, 255, 0.72);
     --border: rgba(15, 23, 42, 0.10);
     --gold: #B8740A;
@@ -223,13 +223,15 @@
   /* Inputs stay medium so typed text is clean (not heavy). */
   html.light .input { font-weight: 500; }
   html.light .input::placeholder { font-weight: 500; }
-  /* Soft pastel animated background instead of the dark gradient. */
+  /* Neutral gray animated background (no color tint) — clean + professional. */
   html.light .animated-bg {
-    background: linear-gradient(125deg, #EEF1F7 0%, #F3EEFB 25%, #F7EEF3 50%, #EAF6F1 75%, #EEF1F7 100%);
+    background: linear-gradient(125deg, #E5E7EB 0%, #DDE0E5 25%, #D1D5DB 50%, #DDE0E5 75%, #E5E7EB 100%);
     background-size: 400% 400%;
   }
-  html.light .bg-orbs::before { background: #FFD27A; opacity: 0.22; }
-  html.light .bg-orbs::after  { background: #C4A8FF; opacity: 0.22; }
+  /* Orbs neutralized to gray tones: a soft lighter pool + a subtle darker
+     one, so they add depth without any colour cast. */
+  html.light .bg-orbs::before { background: #F3F4F6; opacity: 0.45; }
+  html.light .bg-orbs::after  { background: #C8CCD2; opacity: 0.30; }
   /* Glass panels → translucent white with a soft shadow for depth. */
   html.light .glass {
     background: rgba(255, 255, 255, 0.72);
