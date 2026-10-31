@@ -173,9 +173,11 @@
   .badge-danger  { background: rgba(239,68,68,0.15); color: #FCA5A5; }
   .badge-gold    { background: rgba(255,176,32,0.15); color: #FFB020; }
 
-  /* Mobile */
-  @media (max-width: 768px) {
-    .sidebar-wrap { position: fixed; left: -260px; top: 0; bottom: 0; width: 260px; z-index: 50; transition: left .25s ease; }
+  /* Mobile + Tablet portrait: hide sidebar off-canvas, show via hamburger.
+     Uses 1023px so tablets in portrait (768–1023px) get the Android-like
+     slide-out sidebar instead of the always-visible desktop sidebar. */
+  @media (max-width: 1023px) {
+    .sidebar-wrap { position: fixed; left: -280px; top: 0; bottom: 0; width: 280px; z-index: 50; transition: left .25s ease; }
     .sidebar-wrap.open { left: 0; }
   }
 
@@ -253,8 +255,8 @@
     .login-card { padding: 1.25rem !important; }
   }
 
-  /* Make sidebar items taller for touch */
-  @media (max-width: 768px) {
+  /* Make sidebar items taller for touch (phones + tablets) */
+  @media (max-width: 1023px) {
     .nav-item { padding: 0.7rem 0.5rem !important; font-size: 0.95rem !important; }
   }
 </style>
@@ -374,14 +376,14 @@
       </div>
     </div>
 
-    <!-- Backdrop for mobile sidebar -->
-    <div x-show="sidebarOpen" @click="sidebarOpen=false" class="fixed inset-0 bg-black/50 z-40 md:hidden"></div>
+    <!-- Backdrop for mobile/tablet sidebar (hidden on desktop ≥1024px) -->
+    <div x-show="sidebarOpen" @click="sidebarOpen=false" class="fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
 
     <!-- Main content -->
     <div class="flex-1 min-w-0 flex flex-col">
       <!-- Top bar -->
       <header class="glass border-b border-white/5 px-4 py-3 flex items-center gap-3 sticky top-0 z-30">
-        <button class="md:hidden text-2xl" @click="sidebarOpen=!sidebarOpen"><i class='bx bx-menu'></i></button>
+        <button class="lg:hidden text-2xl" @click="sidebarOpen=!sidebarOpen"><i class='bx bx-menu'></i></button>
         <div>
           <div class="font-heading text-lg capitalize" x-text="pageTitle"></div>
           <div class="text-[11px] text-slate-500" x-text="todayLabel"></div>
@@ -647,9 +649,10 @@
                     <i :class="r.icon" class="text-2xl brand-gold"></i>
                     <div class="font-medium mt-2" x-text="r.title"></div>
                     <div class="text-xs text-slate-400 mb-3" x-text="r.desc"></div>
-                    <div class="flex gap-1">
+                    <div class="flex flex-wrap gap-1">
                       <button class="btn-ghost px-2 py-1 rounded text-xs flex-1" @click="previewReport(r.url)"><i class='bx bx-show'></i> Preview</button>
                       <button class="btn-gold px-2 py-1 rounded text-xs flex-1" @click="downloadReport(r.url)"><i class='bx bx-download'></i> Download</button>
+                      <button class="btn-ghost px-2 py-1 rounded text-xs w-full border border-white/10 inline-flex items-center justify-center gap-1" @click="openReportNewTab(r.url)"><i class='bx bx-window-open'></i> Open in New Tab</button>
                     </div>
                   </div>
                 </template>
@@ -669,7 +672,7 @@
                     </div>
                     <div class="font-medium mt-1" x-text="r.label"></div>
                     <div class="text-xs text-slate-400 mb-3" x-text="r.desc"></div>
-                    <div class="flex gap-1">
+                    <div class="flex flex-wrap gap-1">
                       <button class="btn-ghost px-2 py-1 rounded text-xs flex-1 inline-flex items-center justify-center gap-1"
                               @click="previewServiceReport(r.type)" :disabled="reportLoading===r.type">
                         <i class='bx bx-show' x-show="reportLoading!==r.type"></i>
@@ -681,6 +684,12 @@
                         <i class='bx bx-download' x-show="reportLoading!==r.type"></i>
                         <i class='bx bx-loader-alt animate-spin' x-show="reportLoading===r.type" x-cloak></i>
                         <span>Download</span>
+                      </button>
+                      <button class="btn-ghost px-2 py-1 rounded text-xs w-full border border-white/10 inline-flex items-center justify-center gap-1"
+                              @click="openServiceReportNewTab(r.type)" :disabled="reportLoading===r.type">
+                        <i class='bx bx-window-open' x-show="reportLoading!==r.type"></i>
+                        <i class='bx bx-loader-alt animate-spin' x-show="reportLoading===r.type" x-cloak></i>
+                        <span>Open in New Tab</span>
                       </button>
                     </div>
                   </div>
@@ -695,9 +704,10 @@
                     <i :class="r.icon" class="text-2xl brand-emerald"></i>
                     <div class="font-medium mt-2" x-text="r.title"></div>
                     <div class="text-xs text-slate-400 mb-3" x-text="r.desc"></div>
-                    <div class="flex gap-1">
+                    <div class="flex flex-wrap gap-1">
                       <button class="btn-ghost px-2 py-1 rounded text-xs flex-1" @click="previewReport(r.url)"><i class='bx bx-show'></i> Preview</button>
                       <button class="btn-emerald px-2 py-1 rounded text-xs flex-1" @click="downloadReport(r.url)"><i class='bx bx-download'></i> Download</button>
+                      <button class="btn-ghost px-2 py-1 rounded text-xs w-full border border-white/10 inline-flex items-center justify-center gap-1" @click="openReportNewTab(r.url)"><i class='bx bx-window-open'></i> Open in New Tab</button>
                     </div>
                   </div>
                 </template>
@@ -1462,7 +1472,12 @@
   <div class="glass-strong rounded-2xl p-3 w-full max-w-4xl h-[85vh] flex flex-col">
     <div class="flex items-center justify-between mb-2 px-2">
       <h3 class="font-heading text-sm" x-text="previewModal.title || (previewModal.type ? ('Preview — ' + previewModal.type) : 'Preview')"></h3>
-      <div class="flex gap-2">
+      <div class="flex gap-2 flex-wrap justify-end">
+        <button class="btn-ghost px-3 py-1.5 rounded text-xs inline-flex items-center gap-1"
+                x-show="previewModal.url && !previewModal.loading"
+                @click="openPreviewInNewTab()">
+          <i class='bx bx-window-open'></i> New Tab
+        </button>
         <button class="btn-gold px-3 py-1.5 rounded text-xs inline-flex items-center gap-1"
                 x-show="previewModal.url && !previewModal.loading"
                 @click="previewModal.type && previewModal.type.startsWith('service-') ? downloadServiceReport(previewModal.type.replace('service-','')) : downloadReport(previewModal.title)">
@@ -3123,6 +3138,47 @@ function tjApp() {
         this.toast('Service '+type.toUpperCase()+' raporo yakuwe.', 'success');
       } catch(e) { this.toast('Habitaye ikibazo.', 'error'); }
       finally { this.reportLoading = null; }
+    },
+
+    // ===== NEW: Open a report in a new browser tab (full-page view) =====
+    // Product/service reports with a direct PDF URL — the server serves the
+    // PDF inline, so the new tab shows it with the browser's native viewer.
+    openReportNewTab(url) {
+      const win = window.open(url, '_blank');
+      if (!win) {
+        this.toast('Emera pop-up kuri browser yawe.', 'error');
+      }
+    },
+    // Service reports (by type) — the endpoint returns a PDF blob, so we
+    // open a blank tab synchronously (bypasses pop-up blockers), fetch the
+    // blob, then point the tab at the object URL.
+    async openServiceReportNewTab(type) {
+      this.reportLoading = type;
+      const win = window.open('', '_blank');
+      if (!win) {
+        this.toast('Emera pop-up kuri browser yawe.', 'error');
+        this.reportLoading = null;
+        return;
+      }
+      try {
+        const r = await fetch('/generate_service_'+type, { credentials: 'include' });
+        if (!r.ok) { win.close(); this.toast('HTTP '+r.status, 'error'); return; }
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        win.location.href = url;
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        this.toast('Service '+type.toUpperCase()+' raporo yafunguwe muri tab nshya.', 'success');
+      } catch(e) {
+        win.close();
+        this.toast('Habitaye ikibazo.', 'error');
+      } finally { this.reportLoading = null; }
+    },
+    // Pop the current preview modal content out to a full new tab.
+    // previewModal.url is already an object URL of the fetched blob.
+    openPreviewInNewTab() {
+      if (!this.previewModal.url) return;
+      const win = window.open(this.previewModal.url, '_blank');
+      if (!win) this.toast('Emera pop-up kuri browser yawe.', 'error');
     },
 
     // ===== NEW: Hard-delete an employee (irreversible) via confirmModal =====
