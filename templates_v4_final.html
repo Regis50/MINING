@@ -203,6 +203,26 @@
     --purple: #7C3AED;
   }
   html.light body { color: #1A2440; }
+  /* LIGHT MODE = bolder text for visibility on white. Dark-on-white at
+     medium weight can look thin, so bump body to semibold (600) and key
+     UI surfaces to bold (700). Numbers/figures stay crisp at 600. */
+  html.light body { font-weight: 600; }
+  html.light .font-heading { font-weight: 800; }          /* Playfair: extra-bold */
+  html.light .font-mono { font-weight: 600; }              /* figures / KPI values */
+  html.light .text-slate-200,
+  html.light .text-slate-300,
+  html.light .text-slate-400,
+  html.light .text-slate-500,
+  html.light .text-slate-600 { font-weight: 600 !important; } /* muted labels */
+  html.light .nav-item { font-weight: 600; }               /* sidebar links */
+  html.light .nav-item.active { font-weight: 700; }        /* current page */
+  html.light table thead th { font-weight: 700; }          /* table headers bold */
+  html.light table tbody td { font-weight: 600; }          /* table body semibold */
+  html.light .badge { font-weight: 700; }                  /* status pills */
+  html.light .btn-ghost { font-weight: 600; }
+  /* Inputs stay medium so typed text is clean (not heavy). */
+  html.light .input { font-weight: 500; }
+  html.light .input::placeholder { font-weight: 500; }
   /* Soft pastel animated background instead of the dark gradient. */
   html.light .animated-bg {
     background: linear-gradient(125deg, #EEF1F7 0%, #F3EEFB 25%, #F7EEF3 50%, #EAF6F1 75%, #EEF1F7 100%);
