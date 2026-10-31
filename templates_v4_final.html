@@ -44,9 +44,23 @@
     --surface: rgba(20, 26, 50, 0.55);
     --border: rgba(255, 255, 255, 0.08);
   }
-  html, body { font-family: 'Inter', sans-serif; background: var(--bg); color: #E5E7EB; }
-  .font-heading { font-family: 'Playfair Display', serif; }
-  .font-mono { font-family: 'JetBrains Mono', monospace; }
+  html, body {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: #E8EAF0;
+    /* Medium base weight + antialiased smoothing = crisp, readable text on
+       dark glass surfaces (fixes the "very thin" look). */
+    font-weight: 500;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  .font-heading { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; font-weight: 500; }
+  /* Secondary/muted text keeps a readable weight instead of falling back to thin 400. */
+  .text-slate-400, .text-slate-500 { font-weight: 500; }
+  /* Bold up KPI values, table figures and important numbers by default. */
+  .font-mono { letter-spacing: -0.01em; }
 
   /* Animated gradient background */
   .animated-bg {
@@ -150,7 +164,7 @@
   .nav-item {
     display: flex; align-items: center; gap: 0.6rem;
     padding: 0.65rem 0.9rem; border-radius: 12px; cursor: pointer;
-    color: #94A3B8; transition: all .15s ease;
+    color: #CBD5E1; font-weight: 500; transition: all .15s ease;
   }
   .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
   .nav-item.active {
@@ -163,8 +177,8 @@
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
 
-  table thead th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: #94A3B8; }
-  table tbody td { font-size: 0.9rem; }
+  table thead th { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: #CBD5E1; }
+  table tbody td { font-size: 0.9rem; font-weight: 500; }
 
   .badge {
     padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 600;
