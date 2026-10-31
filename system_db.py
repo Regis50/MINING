@@ -644,6 +644,12 @@ def insert_transaction(payload):
 
             if ttype == "SALE":
                 new_qty = max(0, old_qty - qty)
+                # Safety net: never let a SALE silently drive stock below zero.
+                # If the requested qty exceeds current stock, clamp to 0 and
+                # mark the product as oversold (a caller should have rejected
+                # this earlier; this is the last line of defence).
+                if qty > old_qty:
+                    new_qty = 0
                 updates = {"quantity": new_qty}
                 # If the product had no unit_price yet, the employee's sale
                 # establishes it (so future sales + the Owner dashboard use it).

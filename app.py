@@ -373,8 +373,43 @@ def api_transactions_create():
     items = data.get("items") or []
     if not items:
         return jsonify({"error": "No items"}), 400
+    ttype = (data.get("type") or "SALE").upper()
+    # SALE stock validation — refuse to sell more than what's in inventory.
+    # We aggregate duplicate product lines in the same cart and compare the
+    # total requested qty against the live product.quantity. PURCHASE is exempt
+    # because it adds stock.
+    if ttype == "SALE":
+        requested = {}
+        for it in items:
+            pid = it.get("product_id", "")
+            if not pid:
+                continue
+            try:
+                requested[pid] = requested.get(pid, 0) + int(it.get("quantity", 0) or 0)
+            except (TypeError, ValueError):
+                requested[pid] = requested.get(pid, 0) + 0
+        oversold = []
+        for pid, qty in requested.items():
+            prod = system_db.find_product(pid)
+            if prod is None:
+                continue
+            stock = 0
+            try:
+                stock = int(prod.get("quantity", 0) or 0)
+            except (TypeError, ValueError):
+                stock = 0
+            if qty > stock:
+                oversold.append(
+                    f"{prod.get('name', pid)} (wifuzwa {qty}, mu bubiko {stock})"
+                )
+        if oversold:
+            return jsonify({
+                "error": "Ntiushobora kugurisha — warenze ibiri mu bubiko: "
+                         + "; ".join(oversold),
+                "oversold": oversold,
+            }), 400
     payload = {
-        "type": (data.get("type") or "SALE").upper(),
+        "type": ttype,
         "employee_id": user["id"],
         "employee_name": user.get("name", ""),
         "items": items,

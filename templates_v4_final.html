@@ -178,6 +178,85 @@
     .sidebar-wrap { position: fixed; left: -260px; top: 0; bottom: 0; width: 260px; z-index: 50; transition: left .25s ease; }
     .sidebar-wrap.open { left: 0; }
   }
+
+  /* ===================== RESPONSIVE ENHANCEMENTS (phones + tablets) ===================== */
+
+  /* All tables: enforce a sensible min-width so columns don't crush on phones;
+     the parent .overflow-x-auto then scrolls horizontally. */
+  .overflow-x-auto > table { min-width: 640px; }
+  .overflow-x-auto > table.compact-table { min-width: 480px; }
+
+  /* Modals on small screens: take nearly the full viewport, scroll inside. */
+  @media (max-width: 640px) {
+    .modal-backdrop { padding: 0 !important; align-items: stretch !important; }
+    .modal-backdrop > .glass-strong,
+    .modal-backdrop > div.glass-strong,
+    .modal-backdrop > div[class*="rounded-2xl"] {
+      width: 100% !important;
+      max-width: 100% !important;
+      max-height: 100vh !important;
+      height: 100vh !important;
+      border-radius: 0 !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Inputs: prevent iOS zoom-on-focus by enforcing >=16px font */
+    .input, input[type="text"], input[type="number"], input[type="email"],
+    input[type="password"], input[type="tel"], input[type="search"],
+    select, textarea { font-size: 16px !important; }
+    /* Buttons: bigger tap target */
+    button { min-height: 38px; }
+    /* Page topbar: tighten padding */
+    .topbar { padding: 0.5rem 0.75rem !important; }
+    /* KPI cards on very small phones: 1 column */
+    .kpi-grid { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+  }
+
+  /* POS layout on phones: stack vertically and make the cart reachable
+     (sticky summary at the bottom of the screen so employees can checkout
+     without scrolling back up). */
+  @media (max-width: 767px) {
+    .pos-grid { display: flex !important; flex-direction: column !important; gap: 0.75rem !important; }
+    .pos-cart-sticky {
+      position: sticky;
+      bottom: 0;
+      background: rgba(15, 23, 42, 0.97);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid rgba(255, 176, 32, 0.25);
+      padding: 0.6rem 0.75rem;
+      z-index: 30;
+      border-radius: 0.75rem 0.75rem 0 0;
+    }
+    /* Two-column form rows in POS: stack on phones */
+    .pos-form-grid { grid-template-columns: 1fr !important; }
+    /* Quick-access product grid: 2 cols on phones, 3 on small tablets */
+    .pos-quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  }
+  @media (min-width: 641px) and (max-width: 767px) {
+    .pos-quick-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  }
+
+  /* Settings panels: stack the icon + title + action row on phones */
+  @media (max-width: 640px) {
+    .settings-panel-head { flex-direction: column !important; align-items: stretch !important; gap: 0.5rem !important; }
+    .settings-panel-head > div:last-child { width: 100%; }
+    .settings-panel-head > div:last-child button { width: 100%; }
+  }
+
+  /* Approver / product / service cards: 1 column on phones */
+  @media (max-width: 640px) {
+    .card-grid-3 { grid-template-columns: 1fr !important; }
+  }
+
+  /* Login screen: smaller padding on phones */
+  @media (max-width: 480px) {
+    .login-card { padding: 1.25rem !important; }
+  }
+
+  /* Make sidebar items taller for touch */
+  @media (max-width: 768px) {
+    .nav-item { padding: 0.7rem 0.5rem !important; font-size: 0.95rem !important; }
+  }
 </style>
 </head>
 <body x-data="tjApp()" x-init="init()" :class="{ 'overflow-hidden': anyModalOpen }">
@@ -321,7 +400,7 @@
         <template x-if="isOwner && page==='dashboard'">
           <div class="space-y-6">
             <!-- KPI cards -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 kpi-grid">
               <template x-for="(k,i) in kpiCards" :key="i">
                 <div class="glass p-4 card-hover kpi-highlight">
                   <div class="flex items-center justify-between">
@@ -415,7 +494,7 @@
         <template x-if="isOwner && page==='services'">
           <div class="space-y-4">
             <!-- KPI strip -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 kpi-grid">
               <div class="glass p-3">
                 <div class="text-xs text-slate-400">Total Clients</div>
                 <div class="font-mono text-xl brand-emerald" x-text="fmt(svcStats.total_clients)"></div>
@@ -831,7 +910,7 @@
 
             <!-- ===== APPROVAL DASHBOARD ===== -->
             <div class="glass p-5 border border-brand-emerald/40">
-              <div class="flex items-start gap-3 mb-4">
+              <div class="flex items-start gap-3 mb-4 settings-panel-head">
                 <div class="w-12 h-12 rounded-xl bg-brand-emerald/20 flex items-center justify-center flex-shrink-0">
                   <i class='bx bx-user-check text-2xl brand-emerald'></i>
                 </div>
@@ -849,7 +928,7 @@
                   </button>
                 </div>
               </div>
-              <div class="grid sm:grid-cols-3 gap-3" x-show="approversList.length > 0">
+              <div class="grid sm:grid-cols-3 gap-3 card-grid-3" x-show="approversList.length > 0">
                 <template x-for="a in approversList" :key="a.id">
                   <div class="glass p-3 rounded-lg border border-white/5">
                     <div class="flex items-center justify-between mb-1">
@@ -925,11 +1004,11 @@
               <!-- Translation entries (filtered) -->
               <div class="max-h-96 overflow-y-auto space-y-1 pr-1">
                 <template x-for="([key, value], idx) in translationsFiltered" :key="key">
-                  <div class="grid grid-cols-12 gap-2 items-center glass p-2 rounded">
-                    <div class="col-span-4 text-xs">
-                      <div class="font-mono text-slate-300" x-text="key"></div>
+                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center glass p-2 rounded">
+                    <div class="sm:col-span-4 text-xs sm:pt-1">
+                      <div class="font-mono text-slate-300 break-all" x-text="key"></div>
                     </div>
-                    <div class="col-span-8">
+                    <div class="sm:col-span-8">
                       <input class="input text-sm" x-model="translationsEditing[key]" :placeholder="value">
                     </div>
                   </div>
@@ -1112,7 +1191,7 @@
                 <h3 class="font-heading text-sm brand-gold">Ibicuruzwa Byawe (Quick Add — Your Assigned Products)</h3>
                 <span class="text-[10px] text-slate-500 uppercase tracking-wider">Kanda hano hitanywe</span>
               </div>
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 pos-quick-grid">
                 <template x-for="p in products" :key="p.id">
                   <button type="button" class="glass p-3 card-hover text-left rounded-xl"
                           :class="{'ring-2 ring-[#FFB020]': cartForm.product_id === p.id}"
@@ -1132,7 +1211,7 @@
             <!-- Add to cart form -->
             <div class="glass p-4">
               <h3 class="font-heading text-sm mb-3 brand-purple">Ongera igicuruzwa mu murongo (Add Item)</h3>
-              <div class="grid md:grid-cols-4 gap-2">
+              <div class="grid md:grid-cols-4 gap-2 pos-form-grid">
                 <select class="input md:col-span-2" x-model="cartForm.product_id" @change="onCartProductChange()">
                   <option value="">— Hitamo igicuruzwa —</option>
                   <template x-for="p in products" :key="p.id">
@@ -1142,7 +1221,20 @@
                 <input class="input" type="number" min="1" placeholder="Qty" x-model.number="cartForm.quantity">
                 <input class="input" type="number" placeholder="Unit Price" x-model.number="cartForm.unit_price">
               </div>
-              <div class="mt-3 flex gap-2">
+              <!-- Live stock hint for SALE — warns before adding to cart -->
+              <div class="mt-2 text-xs flex items-center gap-2"
+                   x-show="posAction==='SALE' && cartForm.product_id && selectedProductStock >= 0">
+                <i class='bx bx-info-circle text-slate-400'></i>
+                <span class="text-slate-400">Stock iriho: <span class="font-mono text-slate-200" x-text="selectedProductStock"></span></span>
+                <span class="text-slate-400">· Mu murongo ushize: <span class="font-mono text-slate-200" x-text="cartQtyFor(cartForm.product_id)"></span></span>
+                <span class="text-slate-400">· Bisigaye: <span class="font-mono" :class="remainingStock(cartForm.product_id, cartForm.quantity) < 0 ? 'text-red-400 font-bold' : 'text-emerald-400'" x-text="remainingStock(cartForm.product_id, cartForm.quantity)"></span></span>
+              </div>
+              <div class="mt-2 text-xs text-red-400 font-medium flex items-center gap-1"
+                   x-show="posAction==='SALE' && cartForm.product_id && remainingStock(cartForm.product_id, cartForm.quantity) < 0">
+                <i class='bx bx-error'></i>
+                <span>Warenze ibiri mu bubiko! Igicuruzwa kigera kuri <span x-text="selectedProductStock"></span> gusa.</span>
+              </div>
+              <div class="mt-3 flex flex-wrap gap-2">
                 <button class="btn-gold px-3 py-2 rounded-lg text-sm" @click="addToCart()"><i class='bx bx-plus'></i> Add to Cart</button>
                 <button class="btn-ghost px-3 py-2 rounded-lg text-sm" @click="clearCart()"><i class='bx bx-trash'></i> Clear</button>
                 <button class="btn-emerald px-3 py-2 rounded-lg text-sm ml-auto" @click="saveCart()"><i class='bx bx-save'></i> Save Cart</button>
@@ -1150,13 +1242,13 @@
             </div>
 
             <!-- Cart -->
-            <div class="glass p-4">
+            <div class="glass p-4 pos-cart-sticky-mobile">
               <div class="flex items-center justify-between mb-3">
                 <h3 class="font-heading text-sm brand-gold">Urubariro (Cart) — <span x-text="posAction==='SALE'?'Kugurisha':'Kugura'"></span></h3>
                 <span class="text-sm text-slate-400" x-show="cart.length>0">Items: <span x-text="cart.length"></span></span>
               </div>
               <div class="overflow-x-auto">
-                <table class="w-full text-left">
+                <table class="w-full text-left compact-table">
                   <thead class="border-b border-white/5">
                     <tr>
                       <th class="p-2">Product</th>
@@ -1180,9 +1272,9 @@
                   </tbody>
                 </table>
               </div>
-              <div class="mt-3 flex items-center justify-between">
-                <input class="input max-w-xs" placeholder="Notes (optional)" x-model="checkoutNotes">
-                <div class="flex items-center gap-3">
+              <div class="mt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <input class="input sm:max-w-xs w-full" placeholder="Notes (optional)" x-model="checkoutNotes">
+                <div class="flex items-center justify-between sm:justify-end gap-3">
                   <span class="text-sm text-slate-400">Total:</span>
                   <span class="font-mono text-xl brand-gold" x-text="fmtMoney(cartTotal)"></span>
                   <button class="btn-emerald px-4 py-2 rounded-lg text-sm flex items-center gap-2" :disabled="cart.length===0 || busy" @click="checkout()">
@@ -1402,13 +1494,13 @@
     <h3 class="font-heading text-lg mb-3 brand-gold">Bulk Add Products</h3>
     <div class="space-y-2">
       <template x-for="(row,i) in bulkRows" :key="i">
-        <div class="grid grid-cols-12 gap-2">
-          <input class="input col-span-4" placeholder="Product Name" x-model="row.name">
-          <input class="input col-span-2" placeholder="Unit (kg, pc...)" x-model="row.sku">
-          <input class="input col-span-2" placeholder="Category" x-model="row.category">
-          <input class="input col-span-1" type="number" placeholder="Qty" x-model.number="row.quantity">
-          <input class="input col-span-2" type="number" placeholder="Cost" x-model.number="row.cost_price">
-          <input class="input col-span-1" type="number" placeholder="Price" x-model.number="row.unit_price">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
+          <input class="input sm:col-span-4" placeholder="Product Name" x-model="row.name">
+          <input class="input sm:col-span-2" placeholder="Unit (kg, pc...)" x-model="row.sku">
+          <input class="input sm:col-span-2" placeholder="Category" x-model="row.category">
+          <input class="input sm:col-span-1" type="number" placeholder="Qty" x-model.number="row.quantity">
+          <input class="input sm:col-span-2" type="number" placeholder="Cost" x-model.number="row.cost_price">
+          <input class="input sm:col-span-1" type="number" placeholder="Price" x-model.number="row.unit_price">
         </div>
       </template>
     </div>
@@ -1506,7 +1598,7 @@
           </datalist>
         </div>
       </div>
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div>
           <label class="text-xs text-slate-400 mb-1 block">Ububiko (Quantity)</label>
           <input class="input" type="number" placeholder="0" x-model.number="productModal.form.quantity">
@@ -1814,6 +1906,29 @@ function tjApp() {
       );
     },
     get cartTotal() { return this.cart.reduce((s,it)=>s + (Number(it.quantity)||0)*(Number(it.unit_price)||0), 0); },
+    // Stock-aware getters used by the POS stock hint + validation
+    get selectedProductStock() {
+      if (!this.cartForm.product_id) return -1;
+      const p = this.products.find(x => x.id === this.cartForm.product_id);
+      return p ? (Number(p.quantity) || 0) : 0;
+    },
+    // Total qty of a given product already in the cart (for combined stock check)
+    cartQtyFor(pid) {
+      if (!pid) return 0;
+      return this.cart.filter(it => it.product_id === pid)
+                      .reduce((s, it) => s + (Number(it.quantity) || 0), 0);
+    },
+    // What stock would remain if we added `qty` more of `pid` to the cart.
+    // Negative ⇒ over-stock (would push inventory below zero on a SALE).
+    remainingStock(pid, qty) {
+      if (!pid) return 0;
+      const p = this.products.find(x => x.id === pid);
+      if (!p) return 0;
+      const stock = Number(p.quantity) || 0;
+      const alreadyInCart = this.cartQtyFor(pid);
+      const adding = Number(qty) || 0;
+      return stock - alreadyInCart - adding;
+    },
     get resetSelectedCount() { return this.resetTargets.length; },
     get resetTargetsAll() {
       return this.resetTargetOptions.length > 0 &&
@@ -2823,6 +2938,21 @@ function tjApp() {
       const qty = Number(this.cartForm.quantity) || 0;
       const up = Number(this.cartForm.unit_price) || 0;
       if (qty < 1) { this.toast('Qty must be ≥ 1','error'); return; }
+      // SALE stock check — block adding more than what's left in inventory
+      // (PURCHASE adds stock, so no cap is needed there).
+      if (this.posAction === 'SALE') {
+        const stock = Number(p.quantity) || 0;
+        const alreadyInCart = this.cartQtyFor(p.id);
+        const remaining = stock - alreadyInCart - qty;
+        if (remaining < 0) {
+          this.toast(
+            `Warenze ibiri mu bubiko! "${p.name}" kigera kuri ${stock} gusa, `
+            + `mu murongo ushize: ${alreadyInCart}, wishyura: ${qty}.`,
+            'error'
+          );
+          return;
+        }
+      }
       this.cart.push({
         product_id: p.id, product_name: p.name,
         quantity: qty, unit_price: up,
@@ -2854,6 +2984,24 @@ function tjApp() {
         // Scroll to top so the signature panel is visible
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
+      }
+      // Final SALE stock re-check against the live products list (defence in depth
+      // — the backend also rejects this, but failing here avoids a wasted round-trip
+      // and gives the employee a clear per-item message).
+      if (this.posAction === 'SALE') {
+        const oversold = [];
+        for (const it of this.cart) {
+          const p = this.products.find(x => x.id === it.product_id);
+          const stock = p ? (Number(p.quantity) || 0) : 0;
+          const want = Number(it.quantity) || 0;
+          if (want > stock) {
+            oversold.push(`${it.product_name} (wifuzwa ${want}, mu bubiko ${stock})`);
+          }
+        }
+        if (oversold.length) {
+          this.toast('Ntiushobora gukora checkout — ' + oversold.join('; '), 'error');
+          return;
+        }
       }
       this.busy = true;
       try {
