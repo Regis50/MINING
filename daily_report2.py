@@ -221,47 +221,6 @@ def create_daily_report(output_folder="reports"):
     doc.build(elements)
     print(f"✅ PDF Y'UMUNSI YAKOZWE: {output_pdf}")
 
-    # =========================================================
-    # GUKORA CSV NA EXCEL (Nk'uko byakozwe muri Version 1)
-    # =========================================================
-    csv_filename = f"{output_folder}/daily_{izina_ry_umunsi}_{itariki_fmt}.csv"
-    excel_filename = f"{output_folder}/Daily_Report_{izina_ry_umunsi}_{itariki_fmt}.xlsx"
-
-    # Kurengera imirongo itari iy'ibicuruzwa (uko byakozwe muri V1)
-    mask = ~df.iloc[:, 0].astype(str).str.upper().str.contains(
-        'TOTAL|IMBOGA|DETAILS|KWIZERA|UWIMANA|BIKOREWE|T&J|TIN|DAILY REPORT|RAPPORT|DATE|IBYUMWERU|KUGURISHA',
-        na=False
-    )
-    # =========================================================
-    # GUKORA CSV NA EXCEL (inkingi zose zikomeze - nk'uko byakozwe muri Version 1)
-    # Twongerereye amazina meza kugira ngo weekly_report.py abone
-    # inkingi zisanzwe: DETAILS, TODAY QUANTITY, AVG UNIT PRICE
-    # =========================================================
-    RENAME = {0: 'DETAILS', 1: 'TOTAL STOCK', 2: 'UNIT PRICE', 3: 'TODAY QUANTITY', 4: 'AVG UNIT PRICE', 5: 'SOLD AMOUNT', 6: 'CURRENT STOCK', 7: 'PROFIT/LOSS'}
-    df_to_save = df[mask].copy()
-    new_cols = list(df_to_save.columns)
-    for i, name in RENAME.items():
-        if i < len(new_cols):
-            new_cols[i] = name
-    df_to_save.columns = new_cols
-
-    # Kubika CSV (ifungura muri Excel)
-    try:
-        df_to_save.to_csv(csv_filename, index=False)
-        print(f"✅ CSV YABITSWE MURI: {csv_filename}")
-    except Exception as e:
-        print(f"⚠️ Ikindi kibazo cyabaye kuri CSV: {e}")
-
-    # Kubika Excel (.xlsx)
-    try:
-        df_to_save.to_excel(excel_filename, index=False, engine='openpyxl')
-        print(f"✅ EXCEL YABITSWE MURI: {excel_filename}")
-    except ImportError:
-        print("\n❌ IKOSA: Excel ntabwo yakozwe kuko mudasobwa yawe idafite 'openpyxl'.")
-        print("💡 Gukosora: Run-inga iri tegeko kuri terminal yawe: pip install openpyxl\n")
-    except Exception as e:
-        print(f"⚠️ Ikindi kibazo cyabaye kuri Excel: {e}")
-
     return output_pdf
 
 if __name__ == "__main__":

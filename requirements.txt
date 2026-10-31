@@ -1,6 +1,12 @@
 Flask
+flask-cors
 pandas
 reportlab
 gspread
 oauth2client
+google-auth
+google-auth-httplib2
+requests
 gunicorn
+qrcode
+Pillow

@@ -1,0 +1,3242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>T&J THINK BIG MINING ENTERPRISE OS</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  // Extend Tailwind with brand palette so utilities like
+  // text-brand-gold, bg-brand-purple/10, hover:text-brand-danger, etc. work via JIT.
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          brand: {
+            gold:    '#FFB020',
+            emerald: '#00E599',
+            purple:  '#A855F7',
+            info:    '#38BDF8',
+            danger:  '#EF4444',
+          }
+        }
+      }
+    }
+  };
+</script>
+<!-- Alpine.js -->
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<!-- Boxicons -->
+<link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFB020;
+    --emerald: #00E599;
+    --purple: #A855F7;
+    --bg: #0B1020;
+    --surface: rgba(20, 26, 50, 0.55);
+    --border: rgba(255, 255, 255, 0.08);
+  }
+  html, body { font-family: 'Inter', sans-serif; background: var(--bg); color: #E5E7EB; }
+  .font-heading { font-family: 'Playfair Display', serif; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Animated gradient background */
+  .animated-bg {
+    background: linear-gradient(125deg, #0B1020 0%, #1B1240 25%, #2A0B3D 50%, #0B2820 75%, #0B1020 100%);
+    background-size: 400% 400%;
+    animation: bgShift 22s ease-in-out infinite;
+    position: fixed; inset: 0; z-index: -2;
+  }
+  @keyframes bgShift {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .bg-orbs::before, .bg-orbs::after {
+    content: ""; position: fixed; z-index: -1; border-radius: 50%;
+    filter: blur(80px); opacity: 0.35; animation: floatOrb 18s ease-in-out infinite;
+  }
+  .bg-orbs::before {
+    width: 480px; height: 480px; background: var(--gold);
+    top: -100px; left: -80px;
+  }
+  .bg-orbs::after {
+    width: 520px; height: 520px; background: var(--purple);
+    bottom: -120px; right: -100px; animation-delay: -8s;
+  }
+  @keyframes floatOrb {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    50%      { transform: translate(40px, 30px) scale(1.1); }
+  }
+
+  /* Glass panels */
+  .glass {
+    background: var(--surface);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+  }
+  .glass-strong {
+    background: rgba(15, 20, 42, 0.85);
+    backdrop-filter: blur(28px);
+    border: 1px solid var(--border);
+  }
+
+  .brand-gold   { color: var(--gold); }
+  .brand-emerald{ color: var(--emerald); }
+  .brand-purple { color: var(--purple); }
+  .bg-brand-gold    { background: var(--gold); }
+  .bg-brand-emerald { background: var(--emerald); }
+  .bg-brand-purple  { background: var(--purple); }
+
+  .btn-gold {
+    background: linear-gradient(135deg, #FFB020, #FF8A00);
+    color: #0B1020; font-weight: 600;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(255,176,32,0.35); }
+  .btn-emerald {
+    background: linear-gradient(135deg, #00E599, #00A86F);
+    color: #0B1020; font-weight: 600;
+  }
+  .btn-danger {
+    background: linear-gradient(135deg, #EF4444, #B91C1C); color: #fff; font-weight: 600;
+  }
+  .btn-ghost {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #E5E7EB;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.1); }
+
+  .input {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    color: #fff;
+    border-radius: 10px;
+    padding: 0.55rem 0.8rem;
+    width: 100%;
+    outline: none;
+    transition: border .15s ease, box-shadow .15s ease;
+  }
+  .input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(255,176,32,0.18); }
+
+  /* Smooth card hover with gold border glow */
+  .card-hover { transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
+  .card-hover:hover { transform: translateY(-3px); box-shadow: 0 12px 32px -8px rgba(0,0,0,0.5); border-color: rgba(255,176,32,0.3); }
+
+  /* KPI highlight pulse for emphasis on active metric cards */
+  @keyframes highlight-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,176,32,0); } 50% { box-shadow: 0 0 20px -5px rgba(255,176,32,0.3); } }
+  .kpi-highlight { animation: highlight-pulse 3s ease-in-out infinite; }
+
+  /* Toast slide-in-right */
+  @keyframes slideInRight {
+    from { transform: translateX(120%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+  }
+  .toast-anim { animation: slideInRight .35s ease-out; }
+
+  /* Modal */
+  .modal-backdrop { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+
+  /* Sidebar nav */
+  .nav-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.65rem 0.9rem; border-radius: 12px; cursor: pointer;
+    color: #94A3B8; transition: all .15s ease;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  .nav-item.active {
+    background: linear-gradient(135deg, rgba(255,176,32,0.15), rgba(168,85,247,0.15));
+    color: #fff; border: 1px solid rgba(255,176,32,0.3);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+  table thead th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; color: #94A3B8; }
+  table tbody td { font-size: 0.9rem; }
+
+  .badge {
+    padding: 2px 8px; border-radius: 999px; font-size: 0.7rem; font-weight: 600;
+  }
+  .badge-success { background: rgba(0,229,153,0.15); color: #00E599; }
+  .badge-danger  { background: rgba(239,68,68,0.15); color: #FCA5A5; }
+  .badge-gold    { background: rgba(255,176,32,0.15); color: #FFB020; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .sidebar-wrap { position: fixed; left: -260px; top: 0; bottom: 0; width: 260px; z-index: 50; transition: left .25s ease; }
+    .sidebar-wrap.open { left: 0; }
+  }
+</style>
+</head>
+<body x-data="tjApp()" x-init="init()" :class="{ 'overflow-hidden': anyModalOpen }">
+<div class="animated-bg"></div>
+<div class="bg-orbs"></div>
+
+<!-- =================== LOGIN SCREEN =================== -->
+<template x-if="!user">
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="glass glass-strong w-full max-w-md p-8 card-hover">
+      <div class="text-center mb-6">
+        <!-- Real company logo on login screen (with graceful diamond fallback) -->
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-brand-gold/10 mb-3 shadow-lg overflow-hidden">
+          <img x-show="logoOk" src="/static/logo.png" alt="T&J THINK BIG MINING Logo"
+               class="w-20 h-20 object-contain" @error="logoOk=false">
+          <div x-show="!logoOk" x-cloak class="w-20 h-20 rounded-2xl bg-brand-gold flex items-center justify-center">
+            <i class='bx bx-mine text-4xl text-[#0B1020]'></i>
+          </div>
+        </div>
+        <h1 class="font-heading text-2xl brand-gold">T&J THINK BIG</h1>
+        <p class="text-sm text-slate-400">MINING ENTERPRISE OS</p>
+      </div>
+
+      <form @submit.prevent="doLogin()" class="space-y-4">
+        <div>
+          <label class="text-xs text-slate-400">Username</label>
+          <input class="input mt-1" x-model="loginForm.username" placeholder="owner" autocomplete="username" required>
+        </div>
+        <div>
+          <label class="text-xs text-slate-400">Ijambobanga (Password)</label>
+          <div class="relative">
+            <input :type="showPass ? 'text':'password'" class="input mt-1 pr-10" x-model="loginForm.password" placeholder="••••••••" autocomplete="current-password" required>
+            <button type="button" @click="showPass=!showPass" class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
+              <i :class="showPass ? 'bx bx-hide':'bx bx-show'"></i>
+            </button>
+          </div>
+        </div>
+        <div class="text-right">
+          <button type="button" @click="openForgot()" class="text-xs brand-emerald hover:underline">Wibagiwe ijambobanga?</button>
+        </div>
+        <button type="submit" class="w-full py-2.5 rounded-xl btn-gold flex items-center justify-center gap-2" :disabled="loading">
+          <i class='bx bx-log-in' x-show="!loading"></i>
+          <i class='bx bx-loader-alt animate-spin' x-show="loading"></i>
+          <span x-text="loading ? 'Twinjira...' : 'Injira (Login)'"></span>
+        </button>
+        <p x-show="loginError" class="text-sm text-red-400 text-center" x-text="loginError"></p>
+      </form>
+
+      <div class="mt-6 pt-4 border-t border-white/5 text-center space-y-0.5">
+        <p class="text-[10px] text-slate-500 tracking-wide">TIN: 121715003 &nbsp;·&nbsp; TEL: 0782992433</p>
+        <p class="text-[10px] text-slate-500 tracking-wide">EMAIL: uwijacky15@gmail.com</p>
+        <p class="text-[10px] text-slate-600">© T&amp;J THINK BIG MINING ENTERPRISE</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- =================== MAIN APP =================== -->
+<template x-if="user">
+  <div class="min-h-screen flex">
+    <!-- Sidebar -->
+    <div class="sidebar-wrap glass-strong w-64 flex-shrink-0 p-4 flex flex-col"
+         :class="{ 'open': sidebarOpen }">
+      <!-- Issue 5: shared sidebar header — both Owner & Employee see the
+           same logo + company details block. -->
+      <div class="flex items-center gap-2 mb-4 px-2">
+        <!-- Real company logo with graceful fallback to diamond icon -->
+        <img x-show="logoOk" src="/static/logo.png" alt="T&J Logo" class="w-10 h-10 object-contain" @error="logoOk=false">
+        <div x-show="!logoOk" x-cloak class="w-10 h-10 rounded-xl bg-brand-gold flex items-center justify-center">
+          <i class='bx bx-mine text-xl text-[#0B1020]'></i>
+        </div>
+        <div class="min-w-0">
+          <div class="font-heading text-sm brand-gold leading-tight">T&J THINK BIG MINING</div>
+          <div class="text-[10px] text-slate-500">MINING ENTERPRISE OS</div>
+        </div>
+      </div>
+      <!-- Company contact details (TIN / TEL / EMAIL) shared by everyone -->
+      <div class="px-2 mb-4 pb-3 border-b border-white/5 space-y-0.5">
+        <div class="text-[10px] text-slate-500 leading-tight">TIN: <span class="text-slate-300">121715003</span></div>
+        <div class="text-[10px] text-slate-500 leading-tight">TEL: <span class="text-slate-300">0782992433</span></div>
+        <div class="text-[10px] text-slate-500 leading-tight truncate">EMAIL: <span class="text-slate-300">uwijacky15@gmail.com</span></div>
+      </div>
+
+      <!-- Owner nav -->
+      <template x-if="isOwner">
+        <nav class="space-y-1 flex-1">
+          <div class="nav-item" :class="{active: page==='dashboard'}" @click="goto('dashboard')"><i class='bx bx-grid-alt'></i> Dashboard</div>
+          <div class="nav-item" :class="{active: page==='inventory'}" @click="goto('inventory')"><i class='bx bx-package'></i> Inventory</div>
+          <div class="nav-item" :class="{active: page==='services'}" @click="goto('services')"><i class='bx bx-briefcase'></i> Service Business</div>
+          <div class="nav-item" :class="{active: page==='employees'}" @click="goto('employees')"><i class='bx bx-group'></i> Employees</div>
+          <div class="nav-item" :class="{active: page==='analytics'}" @click="goto('analytics')"><i class='bx bx-bar-chart-alt-2'></i> Analytics</div>
+          <div class="nav-item" :class="{active: page==='reports'}" @click="goto('reports')"><i class='bx bx-file'></i> Reports (PDF)</div>
+          <div class="nav-item" :class="{active: page==='settings'}" @click="goto('settings')"><i class='bx bx-cog'></i> Settings</div>
+        </nav>
+      </template>
+
+      <!-- Employee nav -->
+      <template x-if="!isOwner">
+        <nav class="space-y-1 flex-1">
+          <div class="nav-item" :class="{active: page==='pos'}" @click="goto('pos')"><i class='bx bx-cart-alt'></i> Point of Sale</div>
+          <div class="nav-item" :class="{active: page==='record_service'}" @click="goto('record_service')"><i class='bx bx-briefcase-alt'></i> Record Service</div>
+          <div class="nav-item" :class="{active: page==='my_history'}" @click="goto('my_history')"><i class='bx bx-history'></i> My History</div>
+        </nav>
+      </template>
+
+      <div class="border-t border-white/5 pt-3 mt-3">
+        <div class="px-2 py-1">
+          <div class="text-xs text-slate-500">Inganyu</div>
+          <div class="text-sm font-medium" x-text="user.name"></div>
+          <div class="text-[10px] text-slate-500" x-text="user.role"></div>
+        </div>
+        <button @click="doLogout()" class="nav-item w-full mt-2 text-red-400 hover:bg-red-500/10">
+          <i class='bx bx-log-out'></i> Sohuma (Logout)
+        </button>
+      </div>
+    </div>
+
+    <!-- Backdrop for mobile sidebar -->
+    <div x-show="sidebarOpen" @click="sidebarOpen=false" class="fixed inset-0 bg-black/50 z-40 md:hidden"></div>
+
+    <!-- Main content -->
+    <div class="flex-1 min-w-0 flex flex-col">
+      <!-- Top bar -->
+      <header class="glass border-b border-white/5 px-4 py-3 flex items-center gap-3 sticky top-0 z-30">
+        <button class="md:hidden text-2xl" @click="sidebarOpen=!sidebarOpen"><i class='bx bx-menu'></i></button>
+        <div>
+          <div class="font-heading text-lg capitalize" x-text="pageTitle"></div>
+          <div class="text-[11px] text-slate-500" x-text="todayLabel"></div>
+        </div>
+        <div class="ml-auto flex items-center gap-2">
+          <span class="hidden md:inline-flex items-center gap-1 text-xs text-slate-400">
+            <i class='bx bx-time'></i>
+            <span x-text="clock"></span>
+          </span>
+          <span class="badge badge-gold" x-text="isOwner ? 'OWNER' : 'EMPLOYEE'"></span>
+        </div>
+      </header>
+
+      <main class="flex-1 p-4 md:p-6 overflow-x-hidden">
+        <!-- =================== OWNER: DASHBOARD =================== -->
+        <template x-if="isOwner && page==='dashboard'">
+          <div class="space-y-6">
+            <!-- KPI cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+              <template x-for="(k,i) in kpiCards" :key="i">
+                <div class="glass p-4 card-hover kpi-highlight">
+                  <div class="flex items-center justify-between">
+                    <div class="text-xs text-slate-400" x-text="k.label"></div>
+                    <i :class="k.icon" class="text-xl" :style="`color:${k.color}`"></i>
+                  </div>
+                  <div class="mt-2 font-mono text-xl md:text-2xl font-semibold" :style="`color:${k.color}`" x-text="k.value"></div>
+                  <div class="text-[10px] text-slate-500 mt-1" x-text="k.sub"></div>
+                </div>
+              </template>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid md:grid-cols-2 gap-4">
+              <div class="glass p-4">
+                <h3 class="font-heading text-sm mb-2 brand-gold">Sales — Last 7 Days</h3>
+                <canvas id="chartSales7" height="160"></canvas>
+              </div>
+              <div class="glass p-4">
+                <h3 class="font-heading text-sm mb-2 brand-emerald">Profit Trend</h3>
+                <canvas id="chartProfit" height="160"></canvas>
+              </div>
+              <div class="glass p-4">
+                <h3 class="font-heading text-sm mb-2 brand-purple">Top Products</h3>
+                <canvas id="chartTopProducts" height="160"></canvas>
+              </div>
+              <div class="glass p-4">
+                <h3 class="font-heading text-sm mb-2 brand-gold">Sales by Category</h3>
+                <canvas id="chartCategory" height="160"></canvas>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- =================== OWNER: INVENTORY =================== -->
+        <template x-if="isOwner && page==='inventory'">
+          <div class="space-y-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <button class="btn-gold px-3 py-2 rounded-lg text-sm flex items-center gap-1" @click="openProductModal()">
+                <i class='bx bx-plus'></i> Add Product
+              </button>
+              <button class="btn-ghost px-3 py-2 rounded-lg text-sm flex items-center gap-1" @click="bulkModal=true">
+                <i class='bx bx-list-plus'></i> Bulk Add
+              </button>
+              <input class="input max-w-xs ml-auto" placeholder="Search..." x-model="productSearch">
+            </div>
+
+            <div class="glass overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="border-b border-white/5">
+                  <tr>
+                    <th class="p-3">Product Name</th>
+                    <th class="p-3">Category</th>
+                    <th class="p-3">Unit</th>
+                    <th class="p-3 text-right">Qty</th>
+                    <th class="p-3 text-right">Cost Price</th>
+                    <th class="p-3 text-right">Selling Price</th>
+                    <th class="p-3 text-center">Hidden</th>
+                    <th class="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="p in filteredProducts" :key="p.id">
+                    <tr class="border-b border-white/5 hover:bg-white/[0.02]">
+                      <td class="p-3 font-medium" x-text="p.name"></td>
+                      <td class="p-3"><span class="badge badge-gold" x-text="p.category"></span></td>
+                      <td class="p-3 font-mono text-xs" x-text="p.sku || '—'"></td>
+                      <td class="p-3 text-right font-mono" x-text="fmt(p.quantity) + ' ' + (p.sku || '')"></td>
+                      <td class="p-3 text-right font-mono text-slate-300" x-text="fmtMoney(p.cost_price)"></td>
+                      <td class="p-3 text-right font-mono brand-gold" x-text="fmtMoney(p.unit_price)"></td>
+                      <td class="p-3 text-center">
+                        <span class="badge" :class="p.hidden ? 'badge-danger':'badge-success'" x-text="p.hidden ? 'Yes':'No'"></span>
+                      </td>
+                      <td class="p-3 text-right whitespace-nowrap">
+                        <button class="btn-ghost px-2 py-1 rounded text-xs mr-1" @click="openProductModal(p)" title="Edit"><i class='bx bx-edit'></i></button>
+                        <button class="btn-ghost px-2 py-1 rounded text-xs mr-1" @click="toggleHide(p)" :title="p.hidden?'Show':'Hide'"><i class='bx bx-hide' ></i></button>
+                        <button class="btn-danger px-2 py-1 rounded text-xs" @click="deleteProduct(p)" title="Delete"><i class='bx bx-trash'></i></button>
+                      </td>
+                    </tr>
+                  </template>
+                  <tr x-show="filteredProducts.length===0">
+                    <td colspan="8" class="p-6 text-center text-slate-500">No products yet. Click "Add Product" to create one.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </template>
+
+        <!-- =================== OWNER: SERVICES =================== -->
+        <template x-if="isOwner && page==='services'">
+          <div class="space-y-4">
+            <!-- KPI strip -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <div class="glass p-3">
+                <div class="text-xs text-slate-400">Total Clients</div>
+                <div class="font-mono text-xl brand-emerald" x-text="fmt(svcStats.total_clients)"></div>
+              </div>
+              <div class="glass p-3">
+                <div class="text-xs text-slate-400">Total Revenue</div>
+                <div class="font-mono text-xl brand-gold" x-text="fmtMoney(svcStats.total_revenue)"></div>
+              </div>
+              <div class="glass p-3">
+                <div class="text-xs text-slate-400">Transactions</div>
+                <div class="font-mono text-xl brand-purple" x-text="fmt(svcStats.total_transactions)"></div>
+              </div>
+              <div class="glass p-3">
+                <div class="text-xs text-slate-400">Top Service</div>
+                <div class="font-medium text-sm" x-text="svcStats.top_service ? svcStats.top_service.name : '—'"></div>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <button class="btn-gold px-3 py-2 rounded-lg text-sm flex items-center gap-1" @click="openServiceModal()">
+                <i class='bx bx-plus'></i> Add Service
+              </button>
+            </div>
+
+            <div class="glass overflow-x-auto">
+              <table class="w-full text-left">
+                <thead class="border-b border-white/5">
+                  <tr>
+                    <th class="p-3">Name</th>
+                    <th class="p-3">Description</th>
+                    <th class="p-3 text-right">Default Price</th>
+                    <th class="p-3 text-center">Active</th>
+                    <th class="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="s in services" :key="s.id">
+                    <tr class="border-b border-white/5 hover:bg-white/[0.02]">
+                      <td class="p-3 font-medium" x-text="s.name"></td>
+                      <td class="p-3 text-xs text-slate-400 max-w-xs truncate" x-text="s.description"></td>
+                      <td class="p-3 text-right font-mono" x-text="fmtMoney(s.default_price)"></td>
+                      <td class="p-3 text-center">
+                        <span class="badge" :class="s.active ? 'badge-success':'badge-danger'" x-text="s.active ? 'Yes':'No'"></span>
+                      </td>
+                      <td class="p-3 text-right whitespace-nowrap">
+                        <button class="btn-ghost px-2 py-1 rounded text-xs mr-1" @click="openServiceModal(s)"><i class='bx bx-edit'></i></button>
+                        <button class="btn-danger px-2 py-1 rounded text-xs" @click="deleteService(s)"><i class='bx bx-trash'></i></button>
+                      </td>
+                    </tr>
+                  </template>
+                  <tr x-show="services.length===0"><td colspan="5" class="p-6 text-center text-slate-500">No services.</td></tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Employee performance -->
+            <div class="glass p-4">
+              <h3 class="font-heading text-sm mb-3 brand-gold">Employee Performance</h3>
+              <div class="grid md:grid-cols-3 gap-3">
+                <template x-for="e in employees" :key="e.id">
+                  <div class="glass p-3">
+                    <div class="font-medium" x-text="e.name"></div>
+                    <div class="text-xs text-slate-400" x-text="e.username"></div>
+                    <div class="mt-2 text-sm">Svc TX: <span class="font-mono brand-emerald" x-text="employeeSvcCount(e.id)"></span></div>
+                    <div class="text-sm">Revenue: <span class="font-mono brand-gold" x-text="fmtMoney(employeeSvcRevenue(e.id))"></span></div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- =================== OWNER: EMPLOYEES =================== -->
+        <template x-if="isOwner && page==='employees'">
+          <div class="space-y-4">
+            <div class="flex items-center gap-2">
+              <button class="btn-gold px-3 py-2 rounded-lg text-sm flex items-center gap-1" @click="openEmployeeModal()">
+                <i class='bx bx-plus'></i> Add Employee
+              </button>
+            </div>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              <template x-for="e in employees" :key="e.id">
+                <div class="glass p-4 card-hover">
+                  <div class="flex items-start justify-between">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-xl bg-brand-purple/30 flex items-center justify-center text-xl">
+                        <i class='bx bx-user brand-purple'></i>
+                      </div>
+                      <div>
+                        <div class="font-medium" x-text="e.name"></div>
+                        <div class="text-xs text-slate-400" x-text="e.username"></div>
+                      </div>
+                    </div>
+                    <span class="badge" :class="e.active ? 'badge-success':'badge-danger'" x-text="e.active ? 'Active':'Disabled'"></span>
+                  </div>
+                  <div class="text-xs text-slate-400 mt-3">
+                    <div x-show="e.phone"><i class='bx bx-phone'></i> <span x-text="e.phone"></span></div>
+                    <div x-show="e.email"><i class='bx bx-envelope'></i> <span x-text="e.email"></span></div>
+                  </div>
+                  <div class="mt-3 pt-3 border-t border-white/5 flex gap-1 items-center">
+                    <button class="btn-ghost px-2 py-1 rounded text-xs flex-1" @click="openEmployeeModal(e)"><i class='bx bx-edit'></i> Edit</button>
+                    <button class="btn-ghost px-2 py-1 rounded text-xs flex-1 flex items-center justify-center gap-1"
+                            @click="openAssignmentModal(e)"
+                            :disabled="assignLoadingEmpId === e.id">
+                      <i class='bx bx-loader-alt animate-spin' x-show="assignLoadingEmpId === e.id" x-cloak></i>
+                      <i class='bx bx-list-check' x-show="assignLoadingEmpId !== e.id"></i>
+                      <span x-text="assignLoadingEmpId === e.id ? '...' : 'Assign'"></span>
+                    </button>
+                    <button class="btn-danger px-2 py-1 rounded text-xs flex-1" @click="toggleEmployeeActive(e)">
+                      <i class='bx bx-power-off'></i> <span x-text="e.active ? 'Hagarika':'Ongera ufungure'"></span>
+                    </button>
+                    <button @click="deleteEmployee(e)" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-brand-danger" title="Siba Umukozi"><i class='bx bx-trash'></i></button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <!-- =================== OWNER: ANALYTICS =================== -->
+        <template x-if="isOwner && page==='analytics'">
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="glass p-4">
+              <h3 class="font-heading text-sm mb-2 brand-gold">Sales — Last 7 Days</h3>
+              <canvas id="chartSales7a" height="200"></canvas>
+            </div>
+            <div class="glass p-4">
+              <h3 class="font-heading text-sm mb-2 brand-emerald">Profit Trend</h3>
+              <canvas id="chartProfitA" height="200"></canvas>
+            </div>
+            <div class="glass p-4">
+              <h3 class="font-heading text-sm mb-2 brand-purple">Top Products</h3>
+              <canvas id="chartTopProductsA" height="200"></canvas>
+            </div>
+            <div class="glass p-4">
+              <h3 class="font-heading text-sm mb-2 brand-gold">Sales by Category</h3>
+              <canvas id="chartCategoryA" height="200"></canvas>
+            </div>
+          </div>
+        </template>
+
+        <!-- =================== OWNER: REPORTS =================== -->
+        <template x-if="isOwner && page==='reports'">
+          <div class="space-y-6">
+            <div class="glass p-4">
+              <h3 class="font-heading text-base brand-gold mb-3">Product Reports</h3>
+              <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <template x-for="r in productReports" :key="r.key">
+                  <div class="glass p-4 card-hover">
+                    <i :class="r.icon" class="text-2xl brand-gold"></i>
+                    <div class="font-medium mt-2" x-text="r.title"></div>
+                    <div class="text-xs text-slate-400 mb-3" x-text="r.desc"></div>
+                    <div class="flex gap-1">
+                      <button class="btn-ghost px-2 py-1 rounded text-xs flex-1" @click="previewReport(r.url)"><i class='bx bx-show'></i> Preview</button>
+                      <button class="btn-gold px-2 py-1 rounded text-xs flex-1" @click="downloadReport(r.url)"><i class='bx bx-download'></i> Download</button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <!-- ===== NEW: Service Reports (by Type) — uses serviceReportTypes + previewServiceReport/downloadServiceReport ===== -->
+            <div class="glass p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-heading text-base brand-purple">Service Reports (by Type)</h3>
+                <span class="text-[10px] text-slate-500 uppercase tracking-wider">Preview &amp; Download</span>
+              </div>
+              <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <template x-for="r in serviceReportTypes" :key="r.type">
+                  <div class="glass p-4 card-hover">
+                    <div class="inline-flex items-center justify-center w-10 h-10 rounded-xl mb-2" :class="r.bg">
+                      <i :class="r.icon + ' ' + r.color" class="text-2xl"></i>
+                    </div>
+                    <div class="font-medium mt-1" x-text="r.label"></div>
+                    <div class="text-xs text-slate-400 mb-3" x-text="r.desc"></div>
+                    <div class="flex gap-1">
+                      <button class="btn-ghost px-2 py-1 rounded text-xs flex-1 inline-flex items-center justify-center gap-1"
+                              @click="previewServiceReport(r.type)" :disabled="reportLoading===r.type">
+                        <i class='bx bx-show' x-show="reportLoading!==r.type"></i>
+                        <i class='bx bx-loader-alt animate-spin' x-show="reportLoading===r.type" x-cloak></i>
+                        <span>Preview</span>
+                      </button>
+                      <button class="btn-gold px-2 py-1 rounded text-xs flex-1 inline-flex items-center justify-center gap-1"
+                              @click="downloadServiceReport(r.type)" :disabled="reportLoading===r.type">
+                        <i class='bx bx-download' x-show="reportLoading!==r.type"></i>
+                        <i class='bx bx-loader-alt animate-spin' x-show="reportLoading===r.type" x-cloak></i>
+                        <span>Download</span>
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+            <div class="glass p-4">
+              <h3 class="font-heading text-base brand-emerald mb-3">Service Reports</h3>
+              <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <template x-for="r in serviceReports" :key="r.key">
+                  <div class="glass p-4 card-hover">
+                    <i :class="r.icon" class="text-2xl brand-emerald"></i>
+                    <div class="font-medium mt-2" x-text="r.title"></div>
+                    <div class="text-xs text-slate-400 mb-3" x-text="r.desc"></div>
+                    <div class="flex gap-1">
+                      <button class="btn-ghost px-2 py-1 rounded text-xs flex-1" @click="previewReport(r.url)"><i class='bx bx-show'></i> Preview</button>
+                      <button class="btn-emerald px-2 py-1 rounded text-xs flex-1" @click="downloadReport(r.url)"><i class='bx bx-download'></i> Download</button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- =================== OWNER: SETTINGS (Profile + Signature + Reset) =================== -->
+        <template x-if="isOwner && page==='settings'">
+          <div class="space-y-4 max-w-3xl">
+
+            <!-- ===== COMPANY INFO + OWNER DETAILS ===== -->
+            <div class="glass p-5 border border-brand-gold/40">
+              <div class="flex items-start gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-gold/20 flex items-center justify-center flex-shrink-0">
+                  <i class='bx bx-building-house text-2xl brand-gold'></i>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-heading text-base brand-gold mb-1">Amakuru y'Ikigo (Company Details)</h3>
+                  <p class="text-xs text-slate-400">Hindura amazina y'ikigo, telefone, imayili, aderesi. Ibi bigaragara muri raporo zose.</p>
+                </div>
+              </div>
+              <div class="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="text-xs text-slate-400 mb-1 block">Izina ry'Ikigo (Company Full Name)</label>
+                  <input class="input" x-model="ownerProfile.company_full" placeholder="T&J THINK BIG MINING COMPANY LTD">
+                </div>
+                <div>
+                  <label class="text-xs text-slate-400 mb-1 block">Izina Ryoroshye (Short Name)</label>
+                  <input class="input" x-model="ownerProfile.company_name" placeholder="T&J THINK BIG MINING">
+                </div>
+                <div>
+                  <label class="text-xs text-slate-400 mb-1 block">TIN</label>
+                  <input class="input" x-model="ownerProfile.tin" placeholder="121715003">
+                </div>
+                <div>
+                  <label class="text-xs text-slate-400 mb-1 block">Aderesi (Address)</label>
+                  <input class="input" x-model="ownerProfile.address" placeholder="Rwanda">
+                </div>
+                <div>
+                  <label class="text-xs text-slate-400 mb-1 block">Telefone 1 (Phone)</label>
+                  <input class="input" x-model="ownerProfile.phone" placeholder="0782992433">
+                </div>
+                <div>
+                  <label class="text-xs text-slate-400 mb-1 block">Telefone 2 (Alt Phone)</label>
+                  <input class="input" x-model="ownerProfile.alt_phone" placeholder="0788977442">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="text-xs text-slate-400 mb-1 block">Imeyili (Email)</label>
+                  <input class="input" type="email" x-model="ownerProfile.email" placeholder="uwijacky15@gmail.com">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="text-xs text-slate-400 mb-1 block">Google Drive Link (na raporo zibirimo) — izajya muri QR code</label>
+                  <input class="input" x-model="ownerProfile.drive_link" placeholder="https://drive.google.com/drive/folders/...">
+                  <p class="text-[10px] text-slate-500 mt-1">Ibi link bizajya muri QR code iri munsi ya raporo zose.</p>
+                </div>
+              </div>
+              <div class="mt-4 border-t border-white/5 pt-4">
+                <h4 class="text-sm font-medium brand-gold mb-2">Amakuru ya Owner (Personal)</h4>
+                <div class="grid sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="text-xs text-slate-400 mb-1 block">Amazina (Name)</label>
+                    <input class="input" x-model="ownerProfile.owner_name" placeholder="T&J Owner">
+                  </div>
+                  <div>
+                    <label class="text-xs text-slate-400 mb-1 block">Icyerekezo (Title)</label>
+                    <input class="input" x-model="ownerProfile.owner_title" placeholder="Managing Director">
+                  </div>
+                  <div>
+                    <label class="text-xs text-slate-400 mb-1 block">Telefone (Phone)</label>
+                    <input class="input" x-model="ownerProfile.owner_phone" placeholder="0782992433">
+                  </div>
+                  <div class="sm:col-span-3">
+                    <label class="text-xs text-slate-400 mb-1 block">Imeyili (Email)</label>
+                    <input class="input" type="email" x-model="ownerProfile.owner_email" placeholder="owner@tjmining.rw">
+                  </div>
+                </div>
+              </div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <button class="btn-gold px-4 py-2 rounded-lg text-sm flex items-center gap-2"
+                        @click="saveOwnerProfile()" :disabled="ownerProfileLoading">
+                  <i class='bx bx-loader-alt animate-spin' x-show="ownerProfileLoading" x-cloak></i>
+                  <i class='bx bx-save' x-show="!ownerProfileLoading"></i>
+                  <span x-text="ownerProfileLoading ? 'Birikwa...' : 'Bika Amakuru'"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ===== DIGITAL SIGNATURE ===== -->
+            <div class="glass p-5 border border-brand-purple/40">
+              <div class="flex items-start gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-purple/20 flex items-center justify-center flex-shrink-0">
+                  <i class='bx bx-pen text-2xl brand-purple'></i>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-heading text-base brand-purple mb-1">Isinya ya Digital (Digital Signature)</h3>
+                  <p class="text-xs text-slate-400">Andika isinya yawe ino hano — izajya muri raporo zose (rimwe gusa, nyuma ikongera gukoreshwa).</p>
+                  <p class="text-[10px] mt-1" :class="signatureHas ? 'text-emerald-400' : 'text-slate-500'">
+                    <i :class="signatureHas ? 'bx bx-check-circle' : 'bx bx-info-circle'"></i>
+                    <span x-text="signatureHas ? 'Isinya yabitswe — iri gukoreshwa muri raporo zose.' : 'Nta isinya yabitswe.'"></span>
+                  </p>
+                </div>
+              </div>
+              <div class="glass p-2 rounded-lg border border-white/10">
+                <canvas x-ref="sigCanvas"
+                        class="w-full bg-white rounded cursor-crosshair touch-none"
+                        style="height: 180px;"></canvas>
+              </div>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <button class="btn-ghost px-3 py-2 rounded-lg text-sm" @click="clearSigCanvas()">
+                  <i class='bx bx-eraser'></i> Siba Canvas
+                </button>
+                <button class="btn-purple px-4 py-2 rounded-lg text-sm flex items-center gap-2"
+                        @click="saveSignature()" :disabled="signatureSaving">
+                  <i class='bx bx-loader-alt animate-spin' x-show="signatureSaving" x-cloak></i>
+                  <i class='bx bx-save' x-show="!signatureSaving"></i>
+                  <span x-text="signatureSaving ? 'Birikwa...' : 'Bika Isinya'"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ===== APPROVER SIGNATURES EDITOR ===== -->
+            <div class="glass p-5 border border-brand-emerald/40">
+              <div class="flex items-start gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-emerald/20 flex items-center justify-center flex-shrink-0">
+                  <i class='bx bx-pen text-2xl brand-emerald'></i>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-heading text-base brand-emerald mb-1">Isinya z'Abemeza (Approver Signatures)</h3>
+                  <p class="text-xs text-slate-400">Andika isinya ya buri muntu wemera ibikorwa. Izajya muri raporo zose z'umukozi bagenewe.</p>
+                  <button class="btn-ghost px-3 py-1 rounded text-xs mt-2"
+                          @click="loadApproverSigs()" :disabled="approverSigsLoading">
+                    <i class='bx bx-loader-alt animate-spin' x-show="approverSigsLoading" x-cloak></i>
+                    <i class='bx bx-refresh' x-show="!approverSigsLoading"></i>
+                    <span>Kura Isinya z'Abemeza</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <template x-for="a in approversList" :key="a.id">
+                  <div class="glass p-3 rounded-lg border border-white/5">
+                    <div class="flex items-center justify-between mb-2">
+                      <div>
+                        <div class="font-medium text-sm" x-text="a.name"></div>
+                        <div class="text-xs text-slate-400" x-text="a.title"></div>
+                      </div>
+                      <span class="badge"
+                            :class="(approverSigs[a.id] && approverSigs[a.id].has) ? 'badge-success' : 'badge-danger'"
+                            x-text="(approverSigs[a.id] && approverSigs[a.id].has) ? 'Isinya iri' : 'Nta isinya'"></span>
+                    </div>
+
+                    <!-- Show existing signature image (if any) -->
+                    <div x-show="approverSigs[a.id] && approverSigs[a.id].has && approverSigs[a.id].png_base64"
+                         class="mb-2 p-2 bg-white/95 rounded">
+                      <img :src="approverSigs[a.id] ? approverSigs[a.id].png_base64 : ''" alt="sig" class="h-12 mx-auto">
+                    </div>
+
+                    <!-- Canvas for new signature -->
+                    <div class="rounded-lg border border-white/10 overflow-hidden"
+                         x-init="$nextTick(() => initSigCanvasByName('apprSigCanvas_' + a.id))">
+                      <canvas :x-ref="'apprSigCanvas_' + a.id"
+                              class="w-full bg-white cursor-crosshair touch-none"
+                              style="height: 120px;"></canvas>
+                    </div>
+
+                    <div class="mt-2 flex flex-wrap gap-2">
+                      <button class="btn-ghost px-3 py-1 rounded text-xs"
+                              @click="clearSigCanvasByName('apprSigCanvas_' + a.id)">
+                        <i class='bx bx-eraser'></i> Siba
+                      </button>
+                      <button class="btn-emerald px-3 py-1 rounded text-xs flex items-center gap-1"
+                              @click="saveApproverSig(a.id)">
+                        <i class='bx bx-save'></i> Bika Isinya ya <span x-text="a.name"></span>
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+
+            <!-- ===== CHANGE PASSWORD ===== -->
+            <div class="glass p-5 border border-brand-info/40">
+              <div class="flex items-start gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-info/20 flex items-center justify-center flex-shrink-0">
+                  <i class='bx bx-key text-2xl brand-info'></i>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-heading text-base brand-info mb-1">Hindura Ijambo banga (Change Password)</h3>
+                  <p class="text-xs text-slate-400">Hindura ijambo banga rya Owner account.</p>
+                </div>
+              </div>
+              <div class="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="text-xs text-slate-400 mb-1 block">Ijambo banga rishya (New Password)</label>
+                  <input class="input" type="password" x-model="ownerPasswordForm.new_password" placeholder="••••••">
+                </div>
+                <div>
+                  <label class="text-xs text-slate-400 mb-1 block">Emeze (Confirm)</label>
+                  <input class="input" type="password" x-model="ownerPasswordForm.confirm" placeholder="••••••">
+                </div>
+              </div>
+              <div class="mt-3">
+                <button class="btn-info px-4 py-2 rounded-lg text-sm" @click="changeOwnerPassword()">
+                  <i class='bx bx-key'></i> Hindura Ijambo banga
+                </button>
+              </div>
+            </div>
+
+            <!-- ===== APPROVAL DASHBOARD ===== -->
+            <div class="glass p-5 border border-brand-emerald/40">
+              <div class="flex items-start gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-emerald/20 flex items-center justify-center flex-shrink-0">
+                  <i class='bx bx-user-check text-2xl brand-emerald'></i>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-heading text-base brand-emerald mb-1">Abemeza Ibikorwa (Approvers)</h3>
+                  <p class="text-xs text-slate-400">Abantu bemeza ibikorwa by'abakozi n'abakozi bagenewe buri mwe. Kanda "Add Approver" ho kwongeramo undi.</p>
+                </div>
+                <div class="flex gap-2">
+                  <button class="btn-ghost px-3 py-1 rounded text-xs" @click="loadApproversList()" title="Refresh">
+                    <i class='bx bx-refresh'></i>
+                  </button>
+                  <button class="btn-emerald px-3 py-1 rounded text-xs flex items-center gap-1"
+                          @click="openApproverModal()">
+                    <i class='bx bx-plus'></i> Add Approver
+                  </button>
+                </div>
+              </div>
+              <div class="grid sm:grid-cols-3 gap-3" x-show="approversList.length > 0">
+                <template x-for="a in approversList" :key="a.id">
+                  <div class="glass p-3 rounded-lg border border-white/5">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="font-medium text-sm" x-text="a.name"></span>
+                      <span class="badge badge-gold" x-text="a.title || '—'"></span>
+                    </div>
+                    <div class="text-xs text-slate-400">
+                      <div><i class='bx bx-phone'></i> <span x-text="a.phone || '—'"></span></div>
+                      <div><i class='bx bx-envelope'></i> <span x-text="a.email || '—'"></span></div>
+                      <div x-show="a.is_default" class="mt-1">
+                        <span class="badge badge-success text-[10px]">DEFAULT</span>
+                      </div>
+                    </div>
+                    <div class="text-xs mt-2" x-show="a.employees && a.employees.length > 0">
+                      <div class="text-slate-400 mb-1">Abakozi bagenewe:</div>
+                      <template x-for="emp in a.employees" :key="emp.id">
+                        <div class="text-slate-300">• <span x-text="emp.name"></span></div>
+                      </template>
+                    </div>
+                    <div class="text-xs text-slate-500 mt-2" x-show="!a.employees || a.employees.length === 0">
+                      Nta mukozi wagenewe.
+                    </div>
+                    <!-- Edit / Delete buttons -->
+                    <div class="mt-2 pt-2 border-t border-white/5 flex gap-1">
+                      <button class="btn-ghost px-2 py-1 rounded text-xs flex-1" @click="openApproverModal(a)">
+                        <i class='bx bx-edit'></i> Edit
+                      </button>
+                      <button class="btn-danger px-2 py-1 rounded text-xs flex-1"
+                              @click="deleteApprover(a)"
+                              :disabled="a.is_default">
+                        <i class='bx bx-trash'></i> Delete
+                      </button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+              <div class="text-center text-slate-500 text-sm py-6" x-show="approversList.length === 0">
+                Nta approver ubonetse. Kanda "Add Approver" ho kwongeramo.
+              </div>
+              <div class="text-xs text-slate-400 mt-3">
+                <i class='bx bx-info-circle'></i>
+                Kugira togere abakozi kuri buri approver, kanda "Assign" ku mukozi w'i Employees page. Default approver ntishobora gusibwa.
+              </div>
+            </div>
+
+            <!-- ===== UI TRANSLATIONS EDITOR ===== -->
+            <div class="glass p-5 border border-brand-info/40">
+              <div class="flex items-start gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-brand-info/20 flex items-center justify-center flex-shrink-0">
+                  <i class='bx bx-translate text-2xl brand-info'></i>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-heading text-base brand-info mb-1" x-text="tr('section.translations', 'Andika Amagambo (UI Translations)')"></h3>
+                  <p class="text-xs text-slate-400" x-text="tr('section.translations_desc', 'Hindura amagambo y interface.')"></p>
+                </div>
+              </div>
+
+              <!-- Search + actions -->
+              <div class="flex flex-wrap gap-2 mb-3">
+                <input class="input flex-1 min-w-[200px]" placeholder="Shakisha amagambo (search keys/values)..."
+                       x-model="translationsSearch">
+                <button class="btn-ghost px-3 py-2 rounded text-sm" @click="resetTranslationsEditing()">
+                  <i class='bx bx-undo'></i> Reset
+                </button>
+                <button class="btn-info px-4 py-2 rounded text-sm flex items-center gap-2"
+                        @click="saveTranslations()" :disabled="translationsLoading">
+                  <i class='bx bx-loader-alt animate-spin' x-show="translationsLoading" x-cloak></i>
+                  <i class='bx bx-save' x-show="!translationsLoading"></i>
+                  <span x-text="translationsLoading ? tr('btn.saving','Birikwa...') : tr('btn.save','Save')"></span>
+                </button>
+              </div>
+
+              <!-- Translation entries (filtered) -->
+              <div class="max-h-96 overflow-y-auto space-y-1 pr-1">
+                <template x-for="([key, value], idx) in translationsFiltered" :key="key">
+                  <div class="grid grid-cols-12 gap-2 items-center glass p-2 rounded">
+                    <div class="col-span-4 text-xs">
+                      <div class="font-mono text-slate-300" x-text="key"></div>
+                    </div>
+                    <div class="col-span-8">
+                      <input class="input text-sm" x-model="translationsEditing[key]" :placeholder="value">
+                    </div>
+                  </div>
+                </template>
+                <div x-show="translationsFiltered.length === 0" class="text-center text-slate-500 text-sm py-4">
+                  Nta gisubizo kibonetse (no matches).
+                </div>
+              </div>
+
+              <div class="text-xs text-slate-500 mt-2">
+                <i class='bx bx-info-circle'></i>
+                Buri gisubizo cyanditse hano kigomba gushyirwa muri <code class="text-slate-300 bg-black/30 px-1 rounded">translations.json</code>.
+                Hindura agaciro, kanda "Save" — bikanagaragara muri system yose ako kanya (rimwe gusa).
+              </div>
+            </div>
+
+            <!-- DANGER ZONE -->
+            <div class="glass p-5 border border-red-500/40">
+              <div class="flex items-start gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                  <i class='bx bx-error text-2xl text-red-400'></i>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-heading text-base text-red-400 mb-1">Danger Zone — Reset System</h3>
+                  <p class="text-sm text-slate-300">
+                    Hitamo ibyo usiba (choose what to wipe). Ibi ntibishobora kugarurwa.
+                  </p>
+                </div>
+              </div>
+
+              <!-- "Select All" master toggle -->
+              <div class="mb-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30 flex items-center justify-between">
+                <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-red-300">
+                  <input type="checkbox" class="w-4 h-4 accent-red-500"
+                         :checked="resetTargetsAll"
+                         @change="toggleAllResetTargets($event.target.checked)">
+                  <i class='bx bx-trash'></i> SIBA BYOSE (Wipe Everything)
+                </label>
+                <span class="text-xs text-slate-400" x-text="resetSelectedCount + ' selected'"></span>
+              </div>
+
+              <!-- Granular checkboxes -->
+              <div class="grid sm:grid-cols-2 gap-2 mb-4">
+                <template x-for="opt in resetTargetOptions" :key="opt.key">
+                  <label class="flex items-start gap-2 p-3 rounded-lg glass cursor-pointer hover:bg-white/5 transition"
+                         :class="{'ring-2 ring-red-500/40': resetTargets.includes(opt.key)}">
+                    <input type="checkbox" class="w-4 h-4 mt-0.5 accent-red-500"
+                           :value="opt.key"
+                           x-model="resetTargets">
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-medium flex items-center gap-1">
+                        <i :class="opt.icon" :class="opt.color"></i>
+                        <span x-text="opt.label"></span>
+                      </div>
+                      <div class="text-[10px] text-slate-400 mt-0.5" x-text="opt.desc"></div>
+                    </div>
+                  </label>
+                </template>
+              </div>
+
+              <!-- What is always preserved -->
+              <div class="mb-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                <div class="text-xs text-emerald-300 font-medium mb-1">
+                  <i class='bx bx-shield-alt-2'></i> Buri guhe byitawho (always preserved):
+                </div>
+                <ul class="text-xs text-slate-300 list-disc pl-5 space-y-0.5">
+                  <li><b>Owner account</b> yawe n'ikiyandikwa cya session (you stay logged in)</li>
+                  <li><b>Approvers list</b> (T&amp;J Owner, KWIZERA Leonard, UWIMANA Jacqueline)</li>
+                  <li>Imiterere ya Google Sheet (headers)</li>
+                </ul>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <button class="btn-danger px-4 py-2 rounded-lg text-sm flex items-center gap-2"
+                        @click="resetSystem()"
+                        :disabled="resetting || resetTargets.length===0">
+                  <i class='bx bx-loader-alt animate-spin' x-show="resetting" x-cloak></i>
+                  <i class='bx bx-trash' x-show="!resetting"></i>
+                  <span x-text="resetting ? 'Resetting...' : (resetTargets.length===0 ? 'Hitamo byona (select items)' : 'Siba ('+resetTargets.length+')')"></span>
+                </button>
+                <button class="btn-ghost px-4 py-2 rounded-lg text-sm"
+                        @click="goto('dashboard')"
+                        x-show="!resetting">
+                  <i class='bx bx-x'></i> Cancel
+                </button>
+              </div>
+
+              <div x-show="resetResult" x-cloak class="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
+                <div class="text-xs text-emerald-300 font-medium mb-1">
+                  <i class='bx bx-check-circle'></i> Reset Complete
+                </div>
+                <pre class="text-[10px] text-slate-300 whitespace-pre-wrap max-h-40 overflow-auto" x-text="JSON.stringify(resetResult, null, 2)"></pre>
+              </div>
+            </div>
+
+            <!-- Info card -->
+            <div class="glass p-4">
+              <h3 class="font-heading text-sm brand-gold mb-2"><i class='bx bx-info-circle'></i> When to use Reset</h3>
+              <p class="text-xs text-slate-400 leading-relaxed mb-2">
+                Use this when you want a fresh start. For example:
+              </p>
+              <ul class="text-xs text-slate-400 list-disc pl-5 space-y-1">
+                <li><b>Transactions only</b> — keep products/employees but clear sales/purchases history (e.g. new fiscal year)</li>
+                <li><b>Products only</b> — switch to a new product line, keep staff</li>
+                <li><b>Employees + assignments</b> — replace the whole team, keep products</li>
+                <li><b>Reports only</b> — delete old PDF reports without touching any data</li>
+                <li><b>Wipe everything</b> — full fresh start</li>
+              </ul>
+              <div class="mt-3 text-xs text-red-400"><b>⚠ This action cannot be undone.</b></div>
+            </div>
+          </div>
+        </template>
+
+        <!-- =================== EMPLOYEE: POS =================== -->
+        <template x-if="!isOwner && page==='pos'">
+          <div class="space-y-4">
+            <!-- ===== EMPLOYEE SIGNATURE PANEL (must sign before checkout) ===== -->
+            <div class="glass p-4 border border-brand-purple/30" x-show="!mySignature.has"
+                 x-init="$nextTick(() => initSigCanvasByName('mySigCanvas'))">
+              <div class="flex items-start gap-3 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-brand-purple/20 flex items-center justify-center flex-shrink-0">
+                  <i class='bx bx-pen text-xl brand-purple'></i>
+                </div>
+                <div class="flex-1">
+                  <h3 class="font-heading text-sm brand-purple mb-1">Isinya Yawe (Your Signature)</h3>
+                  <p class="text-xs text-slate-400">Andika isinya yawe ino hano MBERE yo gukora transaction. Isinya izajya muri raporo zose zavuye ku bicuruzwa byagurishijwe.</p>
+                </div>
+              </div>
+              <div class="rounded-lg border border-white/10 overflow-hidden">
+                <canvas x-ref="mySigCanvas"
+                        class="w-full bg-white cursor-crosshair touch-none"
+                        style="height: 160px;"></canvas>
+              </div>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <button class="btn-ghost px-3 py-2 rounded-lg text-sm" @click="clearSigCanvasByName('mySigCanvas')">
+                  <i class='bx bx-eraser'></i> Siba
+                </button>
+                <button class="btn-purple px-4 py-2 rounded-lg text-sm flex items-center gap-2"
+                        @click="saveMySignature()" :disabled="mySigSaving">
+                  <i class='bx bx-loader-alt animate-spin' x-show="mySigSaving" x-cloak></i>
+                  <i class='bx bx-save' x-show="!mySigSaving"></i>
+                  <span x-text="mySigSaving ? 'Birikwa...' : 'Bika Isinya Yawe'"></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Signature status banner (when set) -->
+            <div class="glass p-3 border border-brand-emerald/30 flex items-center gap-3" x-show="mySignature.has">
+              <div class="w-8 h-8 rounded-lg bg-brand-emerald/20 flex items-center justify-center flex-shrink-0">
+                <i class='bx bx-check-shield text-lg brand-emerald'></i>
+              </div>
+              <div class="text-xs text-slate-300">
+                Isinya yawe yabitswe — izajya muri raporo zose. (
+                <span x-text="mySignature.signed_at"></span>
+                )
+              </div>
+              <button class="btn-ghost px-3 py-1 rounded text-xs ml-auto" @click="mySignature.has = false; $nextTick(() => initSigCanvasByName('mySigCanvas'))">
+                <i class='bx bx-edit'></i> Hindura
+              </button>
+            </div>
+
+            <!-- Action chooser -->
+            <div class="glass p-4">
+              <h3 class="font-heading text-sm mb-3 brand-gold">Hitamo Igikorwa (Choose Action)</h3>
+              <div class="grid grid-cols-2 gap-3 max-w-md">
+                <button class="glass p-4 card-hover text-center" :class="{'ring-2 ring-[#FFB020]': posAction==='SALE'}" @click="posAction='SALE'">
+                  <i class='bx bx-cart-add text-2xl brand-gold'></i>
+                  <div class="font-medium mt-1">Kugurisha (Sale)</div>
+                </button>
+                <button class="glass p-4 card-hover text-center" :class="{'ring-2 ring-[#00E599]': posAction==='PURCHASE'}" @click="posAction='PURCHASE'">
+                  <i class='bx bx-cart-download text-2xl brand-emerald'></i>
+                  <div class="font-medium mt-1">Kugura (Purchase)</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quick access: assigned products (clickable cards that auto-fill the product dropdown) -->
+            <div class="glass p-4" x-show="products.length > 0">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-heading text-sm brand-gold">Ibicuruzwa Byawe (Quick Add — Your Assigned Products)</h3>
+                <span class="text-[10px] text-slate-500 uppercase tracking-wider">Kanda hano hitanywe</span>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                <template x-for="p in products" :key="p.id">
+                  <button type="button" class="glass p-3 card-hover text-left rounded-xl"
+                          :class="{'ring-2 ring-[#FFB020]': cartForm.product_id === p.id}"
+                          @click="quickSelectProduct(p)">
+                    <div class="flex items-center justify-between">
+                      <i class='bx bx-package text-xl brand-gold'></i>
+                      <span class="text-[9px]" :class="p.quantity > 0 ? 'text-emerald-400' : 'text-red-400'">Stk <span x-text="p.quantity"></span></span>
+                    </div>
+                    <div class="font-medium text-xs mt-1 truncate" x-text="p.name"></div>
+                    <div class="text-[10px] text-slate-400 font-mono" x-text="fmtMoney(p.unit_price)"></div>
+                  </button>
+                </template>
+              </div>
+              <p x-show="products.length === 0" class="text-xs text-slate-500 mt-2">Nta bicuruzwa byawe bihari. Baza umugenzuzi akuguhe ibicuruzwa.</p>
+            </div>
+
+            <!-- Add to cart form -->
+            <div class="glass p-4">
+              <h3 class="font-heading text-sm mb-3 brand-purple">Ongera igicuruzwa mu murongo (Add Item)</h3>
+              <div class="grid md:grid-cols-4 gap-2">
+                <select class="input md:col-span-2" x-model="cartForm.product_id" @change="onCartProductChange()">
+                  <option value="">— Hitamo igicuruzwa —</option>
+                  <template x-for="p in products" :key="p.id">
+                    <option :value="p.id" x-text="`${p.name} (Stock: ${p.quantity}) — ${fmtMoney(p.unit_price)}`"></option>
+                  </template>
+                </select>
+                <input class="input" type="number" min="1" placeholder="Qty" x-model.number="cartForm.quantity">
+                <input class="input" type="number" placeholder="Unit Price" x-model.number="cartForm.unit_price">
+              </div>
+              <div class="mt-3 flex gap-2">
+                <button class="btn-gold px-3 py-2 rounded-lg text-sm" @click="addToCart()"><i class='bx bx-plus'></i> Add to Cart</button>
+                <button class="btn-ghost px-3 py-2 rounded-lg text-sm" @click="clearCart()"><i class='bx bx-trash'></i> Clear</button>
+                <button class="btn-emerald px-3 py-2 rounded-lg text-sm ml-auto" @click="saveCart()"><i class='bx bx-save'></i> Save Cart</button>
+              </div>
+            </div>
+
+            <!-- Cart -->
+            <div class="glass p-4">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-heading text-sm brand-gold">Urubariro (Cart) — <span x-text="posAction==='SALE'?'Kugurisha':'Kugura'"></span></h3>
+                <span class="text-sm text-slate-400" x-show="cart.length>0">Items: <span x-text="cart.length"></span></span>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                  <thead class="border-b border-white/5">
+                    <tr>
+                      <th class="p-2">Product</th>
+                      <th class="p-2 text-right">Qty</th>
+                      <th class="p-2 text-right">Unit Price</th>
+                      <th class="p-2 text-right">Subtotal</th>
+                      <th class="p-2"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="(it,i) in cart" :key="i">
+                      <tr class="border-b border-white/5">
+                        <td class="p-2" x-text="it.product_name"></td>
+                        <td class="p-2 text-right font-mono" x-text="it.quantity"></td>
+                        <td class="p-2 text-right font-mono" x-text="fmtMoney(it.unit_price)"></td>
+                        <td class="p-2 text-right font-mono brand-gold" x-text="fmtMoney(it.quantity*it.unit_price)"></td>
+                        <td class="p-2 text-right"><button class="btn-danger px-2 py-1 rounded text-xs" @click="cart.splice(i,1)"><i class='bx bx-x'></i></button></td>
+                      </tr>
+                    </template>
+                    <tr x-show="cart.length===0"><td colspan="5" class="p-4 text-center text-slate-500">Cart irimo ubusa.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="mt-3 flex items-center justify-between">
+                <input class="input max-w-xs" placeholder="Notes (optional)" x-model="checkoutNotes">
+                <div class="flex items-center gap-3">
+                  <span class="text-sm text-slate-400">Total:</span>
+                  <span class="font-mono text-xl brand-gold" x-text="fmtMoney(cartTotal)"></span>
+                  <button class="btn-emerald px-4 py-2 rounded-lg text-sm flex items-center gap-2" :disabled="cart.length===0 || busy" @click="checkout()">
+                    <i class='bx bx-loader-alt animate-spin' x-show="busy" x-cloak></i>
+                    <i class='bx bx-check' x-show="!busy"></i>
+                    <span x-text="busy ? tr('btn.checking_out', 'Birikwa...') : tr('btn.checkout', 'Checkout')"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Saved carts -->
+            <div class="glass p-4" x-show="savedCarts.length>0">
+              <h3 class="font-heading text-sm mb-2 brand-purple">Carts zabitse (Saved Carts)</h3>
+              <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
+                <template x-for="(c,i) in savedCarts" :key="i">
+                  <div class="glass p-3">
+                    <div class="text-xs text-slate-400" x-text="c.name"></div>
+                    <div class="text-xs">Items: <span x-text="c.items.length"></span> · Total: <span x-text="fmtMoney(c.items.reduce((s,x)=>s+x.quantity*x.unit_price,0))"></span></div>
+                    <div class="mt-2 flex gap-1">
+                      <button class="btn-ghost px-2 py-1 rounded text-xs" @click="loadCart(i)"><i class='bx bx-folder-open'></i> Load</button>
+                      <button class="btn-danger px-2 py-1 rounded text-xs" @click="savedCarts.splice(i,1); persistCarts()"><i class='bx bx-trash'></i></button>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- =================== EMPLOYEE: RECORD SERVICE =================== -->
+        <template x-if="!isOwner && page==='record_service'">
+          <div class="space-y-4">
+            <!-- Quick access: assigned services (clickable cards that auto-fill the service dropdown) -->
+            <div class="glass p-4" x-show="services.length > 0">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-heading text-sm brand-emerald">Serivise Zawe (Quick Add — Your Assigned Services)</h3>
+                <span class="text-[10px] text-slate-500 uppercase tracking-wider">Kanda hano hitanywe</span>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                <template x-for="s in services" :key="s.id">
+                  <button type="button" class="glass p-3 card-hover text-left rounded-xl"
+                          :class="{'ring-2 ring-[#00E599]': svcForm.service_id === s.id}"
+                          @click="quickSelectService(s)">
+                    <div class="flex items-center justify-between">
+                      <i class='bx bx-briefcase-alt text-xl brand-emerald'></i>
+                      <span class="badge badge-success" x-show="s.active">On</span>
+                    </div>
+                    <div class="font-medium text-xs mt-1 truncate" x-text="s.name"></div>
+                    <div class="text-[10px] text-slate-400 font-mono" x-text="fmtMoney(s.default_price)"></div>
+                  </button>
+                </template>
+              </div>
+              <p x-show="services.length === 0" class="text-xs text-slate-500 mt-2">Nta serivise zawe zihari. Baza umugenzuzi akuguhe serivise.</p>
+            </div>
+
+            <div class="glass p-4 max-w-xl">
+              <h3 class="font-heading text-sm mb-3 brand-emerald">Andika Serivise (Record Service)</h3>
+              <div class="space-y-3">
+                <select class="input" x-model="svcForm.service_id" @change="onServiceChange()">
+                  <option value="">— Hitamo serivise —</option>
+                  <template x-for="s in services" :key="s.id">
+                    <option :value="s.id" x-text="`${s.name} — ${fmtMoney(s.default_price)}`"></option>
+                  </template>
+                </select>
+                <input class="input" type="number" min="1" placeholder="Umubare w'abakiriya (# Clients)" x-model.number="svcForm.num_clients">
+                <input class="input" type="number" placeholder="Igiciro kuri umukiriya (Price/Client)" x-model.number="svcForm.price_per_client">
+                <input class="input" placeholder="Notes (optional)" x-model="svcForm.notes">
+                <div class="text-sm text-slate-400">Total: <span class="font-mono brand-emerald" x-text="fmtMoney((svcForm.num_clients||0)*(svcForm.price_per_client||0))"></span></div>
+                <button class="btn-emerald px-4 py-2 rounded-lg text-sm flex items-center gap-2" :disabled="busy || svcSubmitting || !svcForm.service_id" @click="submitService()">
+                  <i class='bx bx-loader-alt animate-spin' x-show="svcSubmitting" x-cloak></i>
+                  <i class='bx bx-check' x-show="!svcSubmitting"></i>
+                  <span x-text="svcSubmitting ? tr('btn.saving', 'Birikwa...') : 'Tanga (Submit)'"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- =================== EMPLOYEE: MY HISTORY =================== -->
+        <template x-if="!isOwner && page==='my_history'">
+          <div class="space-y-4">
+            <div class="glass p-4">
+              <h3 class="font-heading text-sm mb-3 brand-gold">Ibyaguze (My Sales/Purchases)</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                  <thead class="border-b border-white/5">
+                    <tr><th class="p-2">Date</th><th class="p-2">Type</th><th class="p-2 text-right">Items</th><th class="p-2 text-right">Total</th></tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="t in transactions" :key="t.id">
+                      <tr class="border-b border-white/5">
+                        <td class="p-2 text-xs" x-text="fmtDate(t.created_at)"></td>
+                        <td class="p-2"><span class="badge" :class="t.type==='SALE'?'badge-gold':'badge-success'" x-text="t.type"></span></td>
+                        <td class="p-2 text-right font-mono" x-text="t.items_count"></td>
+                        <td class="p-2 text-right font-mono brand-gold" x-text="fmtMoney(t.total_amount)"></td>
+                      </tr>
+                    </template>
+                    <tr x-show="transactions.length===0"><td colspan="4" class="p-4 text-center text-slate-500">Nta makuru ahari.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="glass p-4">
+              <h3 class="font-heading text-sm mb-3 brand-emerald">Serivise Nakoze (My Services)</h3>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                  <thead class="border-b border-white/5">
+                    <tr><th class="p-2">Date</th><th class="p-2">Service</th><th class="p-2 text-right">Clients</th><th class="p-2 text-right">Total</th></tr>
+                  </thead>
+                  <tbody>
+                    <template x-for="t in svcTransactions" :key="t.id">
+                      <tr class="border-b border-white/5">
+                        <td class="p-2 text-xs" x-text="fmtDate(t.created_at)"></td>
+                        <td class="p-2" x-text="t.service_name"></td>
+                        <td class="p-2 text-right font-mono" x-text="t.num_clients"></td>
+                        <td class="p-2 text-right font-mono brand-emerald" x-text="fmtMoney(t.total_amount)"></td>
+                      </tr>
+                    </template>
+                    <tr x-show="svcTransactions.length===0"><td colspan="4" class="p-4 text-center text-slate-500">Nta makuru ahari.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </template>
+
+      </main>
+    </div>
+  </div>
+</template>
+
+<!-- =================== MODALS =================== -->
+
+<!-- Confirm modal — CRITICAL: targetable by .confirm-modal-btn -->
+<div x-show="confirmModal.open" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-backdrop" @keydown.escape.window="confirmModal.open=false">
+  <div class="glass-strong rounded-2xl p-6 w-full max-w-sm" @click.outside="confirmModal.open=false">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center">
+        <i class='bx bx-error text-red-400 text-xl'></i>
+      </div>
+      <h3 class="font-heading text-lg" x-text="confirmModal.title"></h3>
+    </div>
+    <p class="text-sm text-slate-300 mb-5" x-text="confirmModal.message"></p>
+    <!-- Optional typed-confirmation input -->
+    <div x-show="confirmModal.requireInput" x-cloak class="mb-4">
+      <input type="text" x-model="confirmInput" autocomplete="off"
+             class="w-full px-3 py-2 rounded-lg bg-black/30 border border-white/10 text-white text-sm focus:outline-none focus:border-red-400"
+             :placeholder="'Andika: ' + (confirmModal.requireInput || '')">
+      <div class="text-[10px] text-slate-500 mt-1" x-show="confirmInput && confirmInput !== confirmModal.requireInput">
+        Type exactly: <span class="text-red-400" x-text="confirmModal.requireInput"></span>
+      </div>
+    </div>
+    <div class="flex gap-2 justify-end">
+      <button class="btn-ghost px-4 py-2 rounded-lg text-sm"
+              :disabled="confirmModal.loading"
+              @click="confirmModal.open=false" x-text="tr('btn.cancel', 'Cancel (Bashye)')"></button>
+      <button class="confirm-modal-btn px-4 py-2 rounded-lg text-sm flex items-center gap-2"
+              :class="confirmModal.confirmClass || 'btn-danger'"
+              :disabled="(confirmModal.requireInput && confirmInput !== confirmModal.requireInput) || confirmModal.loading"
+              @click="executeConfirm()">
+        <i class='bx bx-loader-alt animate-spin' x-show="confirmModal.loading" x-cloak></i>
+        <span x-text="confirmModal.loading ? tr('btn.saving', 'Birikwa...') : confirmModal.confirmText"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot password modal -->
+<div x-show="forgotModal" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-backdrop" @keydown.escape.window="forgotModal=false">
+  <div class="glass-strong rounded-2xl p-6 w-full max-w-sm" @click.outside="forgotModal=false">
+    <h3 class="font-heading text-lg mb-2 brand-emerald">Wibagiwe ijambobanga?</h3>
+    <p class="text-xs text-slate-400 mb-3">Andika username cyangwa email yawe — tuzagusubirije.</p>
+    <input class="input mb-3" placeholder="Username or Email" x-model="forgotForm.identifier">
+    <p x-show="forgotMsg" class="text-xs mb-3" :class="forgotOk ? 'text-emerald-400':'text-red-400'" x-text="forgotMsg"></p>
+    <div class="flex gap-2 justify-end">
+      <button class="btn-ghost px-4 py-2 rounded-lg text-sm" @click="forgotModal=false">Bashye</button>
+      <button class="btn-emerald px-4 py-2 rounded-lg text-sm" @click="submitForgot()">Tuma (Send)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Preview modal — supports both URL-based (product/service) and by-type service reports with loading/error states -->
+<div x-show="previewModal.open" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-backdrop" @keydown.escape.window="previewModal.open=false">
+  <div class="glass-strong rounded-2xl p-3 w-full max-w-4xl h-[85vh] flex flex-col">
+    <div class="flex items-center justify-between mb-2 px-2">
+      <h3 class="font-heading text-sm" x-text="previewModal.title || (previewModal.type ? ('Preview — ' + previewModal.type) : 'Preview')"></h3>
+      <div class="flex gap-2">
+        <button class="btn-gold px-3 py-1.5 rounded text-xs inline-flex items-center gap-1"
+                x-show="previewModal.url && !previewModal.loading"
+                @click="previewModal.type && previewModal.type.startsWith('service-') ? downloadServiceReport(previewModal.type.replace('service-','')) : downloadReport(previewModal.title)">
+          <i class='bx bx-download'></i> Download
+        </button>
+        <button class="btn-ghost px-3 py-1.5 rounded text-xs" @click="previewModal.open=false"><i class='bx bx-x'></i> Close</button>
+      </div>
+    </div>
+    <!-- Loading state -->
+    <div x-show="previewModal.loading" class="flex-1 flex flex-col items-center justify-center text-slate-400 gap-3">
+      <i class='bx bx-loader-alt animate-spin text-4xl brand-gold'></i>
+      <p class="text-sm">Tegereza... Raporo irakorwa.</p>
+    </div>
+    <!-- Error state -->
+    <div x-show="previewModal.error" class="flex-1 flex flex-col items-center justify-center text-red-400 gap-2">
+      <i class='bx bx-error-circle text-4xl'></i>
+      <p class="text-sm" x-text="previewModal.error"></p>
+    </div>
+    <!-- PDF iframe (only when url present, not loading, no error) -->
+    <iframe x-show="previewModal.url && !previewModal.loading && !previewModal.error"
+            :src="previewModal.url + '#toolbar=0'"
+            class="flex-1 w-full rounded-xl bg-white" frameborder="0"></iframe>
+  </div>
+</div>
+
+<!-- Bulk add products modal -->
+<div x-show="bulkModal" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-backdrop" @keydown.escape.window="bulkModal=false">
+  <div class="glass-strong rounded-2xl p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto" @click.outside="bulkModal=false">
+    <h3 class="font-heading text-lg mb-3 brand-gold">Bulk Add Products</h3>
+    <div class="space-y-2">
+      <template x-for="(row,i) in bulkRows" :key="i">
+        <div class="grid grid-cols-12 gap-2">
+          <input class="input col-span-4" placeholder="Product Name" x-model="row.name">
+          <input class="input col-span-2" placeholder="Unit (kg, pc...)" x-model="row.sku">
+          <input class="input col-span-2" placeholder="Category" x-model="row.category">
+          <input class="input col-span-1" type="number" placeholder="Qty" x-model.number="row.quantity">
+          <input class="input col-span-2" type="number" placeholder="Cost" x-model.number="row.cost_price">
+          <input class="input col-span-1" type="number" placeholder="Price" x-model.number="row.unit_price">
+        </div>
+      </template>
+    </div>
+    <div class="flex gap-2 mt-3">
+      <button class="btn-ghost px-3 py-2 rounded text-sm" @click="bulkRows.push({name:'',sku:'',category:'',quantity:0,unit_price:0,cost_price:0})"><i class='bx bx-plus'></i> Add row</button>
+      <button class="btn-danger px-3 py-2 rounded text-sm" @click="bulkRows.pop()" x-show="bulkRows.length>1"><i class='bx bx-minus'></i> Remove last</button>
+      <button class="btn-gold px-4 py-2 rounded text-sm ml-auto flex items-center gap-2" :disabled="busy" @click="submitBulk()">
+        <i class='bx bx-loader-alt animate-spin' x-show="busy" x-cloak></i>
+        <i class='bx bx-save' x-show="!busy"></i>
+        <span x-text="busy ? tr('btn.saving', 'Birikwa...') : tr('btn.save_all', 'Save All')"></span>
+      </button>
+      <button class="btn-ghost px-3 py-2 rounded text-sm" @click="bulkModal=false" x-text="tr('btn.cancel', 'Cancel')"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Assignment modal -->
+<div x-show="assignModal.open" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-backdrop" @keydown.escape.window="assignModal.open=false">
+  <div class="glass-strong rounded-2xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto" @click.outside="assignModal.open=false">
+    <h3 class="font-heading text-lg mb-1 brand-purple">Assign — <span x-text="assignModal.employee?.name"></span></h3>
+    <p class="text-xs text-slate-400 mb-3">Hitamo ibicuruzwa na serivise umukozi ashobora gukoresha, n'uwemera ibikorwa bye.</p>
+
+    <!-- Approver selector -->
+    <div class="glass p-3 mb-3 border border-brand-purple/30">
+      <label class="text-xs text-slate-400 mb-1 block">Uwemera Ibikorwa (Approver)</label>
+      <select class="input" x-model="assignModal.approver_id">
+        <option value="">— Ntawo hitamo (None / use default) —</option>
+        <template x-for="a in approversList" :key="a.id">
+          <option :value="a.id" x-text="a.name + ' — ' + (a.title||'') + ' (' + (a.phone||'') + ')'"></option>
+        </template>
+      </select>
+      <p class="text-[10px] text-slate-500 mt-1">Approver agaragara muri raporo z'umukozi.</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <h4 class="text-xs uppercase text-slate-400 mb-2">Ibicuruzwa (Products)</h4>
+        <div class="space-y-1 max-h-64 overflow-y-auto pr-1">
+          <template x-for="p in allProductsForAssign" :key="p.id">
+            <label class="flex items-center gap-2 glass p-2 text-sm">
+              <input type="checkbox" :value="p.id" x-model="assignModal.product_ids">
+              <span x-text="p.name"></span>
+            </label>
+          </template>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-xs uppercase text-slate-400 mb-2">Serivise (Services)</h4>
+        <div class="space-y-1 max-h-64 overflow-y-auto pr-1">
+          <template x-for="s in allServicesForAssign" :key="s.id">
+            <label class="flex items-center gap-2 glass p-2 text-sm">
+              <input type="checkbox" :value="s.id" x-model="assignModal.service_ids">
+              <span x-text="s.name"></span>
+            </label>
+          </template>
+        </div>
+      </div>
+    </div>
+    <div class="flex gap-2 mt-4 justify-end">
+      <button class="btn-ghost px-3 py-2 rounded text-sm" @click="assignModal.open=false" x-text="tr('btn.cancel', 'Cancel')"></button>
+      <button class="btn-danger px-4 py-2 rounded text-sm" :disabled="busy"
+              @click="clearAssignments()">
+        <i class='bx bx-trash'></i> <span x-text="tr('btn.clear_all', 'Kuraho Byose')"></span>
+      </button>
+      <button class="btn-emerald px-4 py-2 rounded text-sm" :disabled="busy" @click="saveAssignments()">
+        <i class='bx bx-save' x-show="!busy"></i>
+        <i class='bx bx-loader-alt animate-spin' x-show="busy"></i>
+        <span x-text="busy ? tr('btn.saving', 'Birikwa...') : tr('btn.save', 'Save')"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Product Add/Edit modal -->
+<div x-show="productModal.open" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-backdrop" @keydown.escape.window="productModal.open=false">
+  <div class="glass-strong rounded-2xl p-6 w-full max-w-md" @click.outside="productModal.open=false">
+    <h3 class="font-heading text-lg mb-3 brand-gold" x-text="productModal.isEdit ? 'Edit Product':'Add Product'"></h3>
+    <div class="space-y-3">
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Izina ry'igicuruzwa (Product Name)</label>
+        <input class="input" placeholder="Urugero: ibishyimbo" x-model="productModal.form.name">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Icyiciro (Category)</label>
+          <input class="input" placeholder="Urugero: ibiryo" x-model="productModal.form.category">
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Igipimo (Unit: kg, pc, littre...)</label>
+          <input class="input" list="unit-list" placeholder="kg" x-model="productModal.form.sku">
+          <datalist id="unit-list">
+            <option value="kg"><option value="g"><option value="pc"><option value="littre">
+            <option value="ml"><option value="box"><option value="sack">
+            <option value="ton"><option value="m"><option value="m²">
+          </datalist>
+        </div>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Ububiko (Quantity)</label>
+          <input class="input" type="number" placeholder="0" x-model.number="productModal.form.quantity">
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Igiciro cyo Gufungura (Cost Price)</label>
+          <input class="input" type="number" placeholder="0" x-model.number="productModal.form.cost_price">
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Igiciro cyo Kugurisha (Selling Price)</label>
+          <input class="input" type="number" placeholder="0" x-model.number="productModal.form.unit_price">
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" x-model="productModal.form.hidden"> Hisha igicuruzwa (Hidden)
+      </label>
+    </div>
+    <div class="flex gap-2 mt-4 justify-end">
+      <button class="btn-ghost px-3 py-2 rounded text-sm" @click="productModal.open=false" x-text="tr('btn.cancel', 'Cancel')"></button>
+      <button class="btn-gold px-4 py-2 rounded text-sm" :disabled="busy" @click="saveProduct()">
+        <i class='bx bx-loader-alt animate-spin' x-show="busy" x-cloak></i>
+        <i class='bx bx-save' x-show="!busy"></i>
+        <span x-text="busy ? tr('btn.saving', 'Birikwa...') : tr('btn.save', 'Save')"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Service Add/Edit modal -->
+<div x-show="serviceModal.open" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-backdrop" @keydown.escape.window="serviceModal.open=false">
+  <div class="glass-strong rounded-2xl p-6 w-full max-w-md" @click.outside="serviceModal.open=false">
+    <h3 class="font-heading text-lg mb-3 brand-emerald" x-text="serviceModal.isEdit ? 'Edit Service':'Add Service'"></h3>
+    <div class="space-y-3">
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Izina rya Serivise (Service Name)</label>
+        <input class="input" placeholder="Urugero: Transport" x-model="serviceModal.form.name">
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Ibisobanuro (Description)</label>
+        <textarea class="input" rows="2" placeholder="Mwifuzo kwandika..." x-model="serviceModal.form.description"></textarea>
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Igiciro Mwimerere (Default Price, RWF)</label>
+        <input class="input" type="number" placeholder="0" x-model.number="serviceModal.form.default_price">
+      </div>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" x-model="serviceModal.form.active"> Serivise iri gukora (Active)
+      </label>
+    </div>
+    <div class="flex gap-2 mt-4 justify-end">
+      <button class="btn-ghost px-3 py-2 rounded text-sm" @click="serviceModal.open=false" x-text="tr('btn.cancel', 'Cancel')"></button>
+      <button class="btn-emerald px-4 py-2 rounded text-sm" :disabled="busy" @click="saveService()">
+        <i class='bx bx-loader-alt animate-spin' x-show="busy" x-cloak></i>
+        <i class='bx bx-save' x-show="!busy"></i>
+        <span x-text="busy ? tr('btn.saving', 'Birikwa...') : tr('btn.save', 'Save')"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Approver Add/Edit modal -->
+<div x-show="approverModal.open" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-backdrop" @keydown.escape.window="approverModal.open=false">
+  <div class="glass-strong rounded-2xl p-6 w-full max-w-md" @click.outside="approverModal.open=false">
+    <h3 class="font-heading text-lg mb-3 brand-emerald" x-text="approverModal.isEdit ? 'Edit Approver' : 'Add Approver'"></h3>
+    <p class="text-xs text-slate-400 mb-3">Andika amakuru ya approver — izina, title, telefone, imeyili. Hitamo default niba ari we MweneNyarwanda w'ibikorwa byose.</p>
+    <div class="space-y-3">
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Amazina (Name) *</label>
+        <input class="input" placeholder="Urugero: KWIZERA Leonard" x-model="approverModal.form.name">
+      </div>
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Icyerekezo / Title</label>
+        <input class="input" placeholder="Urugero: Accountant, Operations Manager..." x-model="approverModal.form.title">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Telefone (Phone)</label>
+          <input class="input" placeholder="0788..." x-model="approverModal.form.phone">
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Imeyili (Email)</label>
+          <input class="input" type="email" placeholder="name@example.com" x-model="approverModal.form.email">
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" x-model="approverModal.form.is_default">
+        Approver default (bijkora niba umukozi nta approver yagenewe)
+      </label>
+      <div x-show="approverModal.form.is_default" class="text-xs text-amber-400">
+        <i class='bx bx-info-circle'></i> Guhitamo default bivuze ko izindi zose zikurwaho default status.
+      </div>
+    </div>
+    <div class="flex gap-2 mt-4 justify-end">
+      <button class="btn-ghost px-3 py-2 rounded text-sm"
+              :disabled="approverModal.loading"
+              @click="approverModal.open=false" x-text="tr('btn.cancel', 'Cancel')"></button>
+      <button class="btn-emerald px-4 py-2 rounded text-sm flex items-center gap-2"
+              :disabled="approverModal.loading"
+              @click="saveApprover()">
+        <i class='bx bx-loader-alt animate-spin' x-show="approverModal.loading" x-cloak></i>
+        <i class='bx bx-save' x-show="!approverModal.loading"></i>
+        <span x-text="approverModal.loading ? tr('btn.saving', 'Birikwa...') : (approverModal.isEdit ? 'Bika Hindura' : 'Bika Approver')"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Employee Add/Edit modal -->
+<div x-show="employeeModal.open" x-cloak class="fixed inset-0 z-[80] flex items-center justify-center p-4 modal-backdrop" @keydown.escape.window="employeeModal.open=false">
+  <div class="glass-strong rounded-2xl p-6 w-full max-w-md" @click.outside="employeeModal.open=false">
+    <h3 class="font-heading text-lg mb-3 brand-purple" x-text="employeeModal.isEdit ? 'Edit Employee':'Add Employee'"></h3>
+    <div class="space-y-3">
+      <div>
+        <label class="text-xs text-slate-400 mb-1 block">Amazina (Full Name)</label>
+        <input class="input" placeholder="Urugero: Manzi Emmanuel" x-model="employeeModal.form.name">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Izina ryo Kwinjira (Username)</label>
+          <input class="input" placeholder="manzi" x-model="employeeModal.form.username">
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Ijambo banga (Password)</label>
+          <input class="input" type="password" placeholder="••••••" x-model="employeeModal.form.password">
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Telefone (Phone)</label>
+          <input class="input" placeholder="0788..." x-model="employeeModal.form.phone">
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Imeyili (Email)</label>
+          <input class="input" type="email" placeholder="name@example.com" x-model="employeeModal.form.email">
+        </div>
+      </div>
+      <label class="flex items-center gap-2 text-sm">
+        <input type="checkbox" x-model="employeeModal.form.active"> Umukozi akoze (Active)
+      </label>
+    </div>
+    <div class="flex gap-2 mt-4 justify-end">
+      <button class="btn-ghost px-3 py-2 rounded text-sm" @click="employeeModal.open=false" x-text="tr('btn.cancel', 'Cancel')"></button>
+      <button class="btn-gold px-4 py-2 rounded text-sm" :disabled="busy" @click="saveEmployee()">
+        <i class='bx bx-loader-alt animate-spin' x-show="busy" x-cloak></i>
+        <i class='bx bx-save' x-show="!busy"></i>
+        <span x-text="busy ? tr('btn.saving', 'Birikwa...') : tr('btn.save', 'Save')"></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="fixed top-4 right-4 z-[100] space-y-2 w-80 max-w-[90vw]">
+  <template x-for="t in toasts" :key="t.id">
+    <div class="glass-strong rounded-xl p-3 flex items-center gap-3 toast-anim"
+         :class="{'border-l-4 border-emerald-400':t.type==='success','border-l-4 border-red-400':t.type==='error','border-l-4 border-yellow-400':t.type==='info'}">
+      <i :class="t.type==='success' ? 'bx bx-check-circle text-emerald-400' : (t.type==='error' ? 'bx bx-x-circle text-red-400' : 'bx bx-info-circle text-yellow-400')" class="text-xl"></i>
+      <span class="text-sm flex-1" x-text="t.msg"></span>
+      <button @click="toasts = toasts.filter(x=>x.id!==t.id)" class="text-slate-400 hover:text-white"><i class='bx bx-x'></i></button>
+    </div>
+  </template>
+</div>
+
+<script>
+function tjApp() {
+  return {
+    // ---- state ----
+    user: null,
+    loading: false,
+    loginError: '',
+    showPass: false,
+    loginForm: { username: '', password: '' },
+    page: 'dashboard',
+    sidebarOpen: false,
+    clock: '',
+    todayLabel: '',
+    busy: false,
+    toasts: [],
+    toastId: 1,
+    // Logo load state — flips to false if /static/logo.png fails, showing the diamond fallback
+    logoOk: true,
+
+    products: [],
+    allProductsForAssign: [],
+    productSearch: '',
+    services: [],
+    allServicesForAssign: [],
+    employees: [],
+    transactions: [],
+    svcTransactions: [],
+    svcStats: { total_clients:0, total_revenue:0, total_transactions:0, top_service:null, least_service:null, by_service:[] },
+    kpis: {},
+    charts: { sales_last_7_days:[], top_products:[], sales_by_category:[], profit_trend:[] },
+
+    // POS
+    posAction: 'SALE',
+    cart: [],
+    cartForm: { product_id:'', quantity:1, unit_price:0 },
+    checkoutNotes: '',
+    savedCarts: [],
+
+    // Service form
+    svcForm: { service_id:'', num_clients:1, price_per_client:0, notes:'' },
+
+    // Modals
+    confirmModal: { open:false, title:'', message:'', confirmText:'Confirm', confirmClass:'btn-danger', onConfirm:null, requireInput:null, loading:false },
+    confirmInput: '',
+    forgotModal: false,
+    forgotForm: { identifier:'' },
+    forgotMsg: '', forgotOk: false,
+    previewModal: { open:false, url:'', title:'' },
+    bulkModal: false,
+    bulkRows: [{name:'',sku:'',category:'',quantity:0,unit_price:0,cost_price:0}],
+    assignModal: { open:false, employee:null, product_ids:[], service_ids:[], approver_id:'' },
+    approversList: [],
+    productModal: { open:false, isEdit:false, form:{} },
+    serviceModal: { open:false, isEdit:false, form:{} },
+    employeeModal: { open:false, isEdit:false, form:{} },
+
+    // Owner profile (editable in Settings)
+    ownerProfile: {},
+    ownerProfileLoading: false,
+    ownerPasswordForm: { new_password: '', confirm: '' },
+    signatureHas: false,
+    signatureSaving: false,
+    sigDrawing: false,
+
+    // UI Translations (loaded from /api/translations, editable in Settings)
+    translations: {},
+    translationsLoading: false,
+    translationsEditing: {},  // working copy for the editor
+    translationsSearch: '',
+
+    // Employee signature (current user's own signature)
+    mySignature: { has: false, png_base64: '', name: '', signed_at: '' },
+    mySigSaving: false,
+    // Approver signatures (Owner manages these)
+    approverSigs: {},  // {approver_id: {has, png_base64, name, signed_at}}
+    approverSigsLoading: false,
+    // Currently selected approver for signature editing
+    selectedApproverForSig: null,
+    // Tracks which employee's Assign button is loading (so we show spinner on that card)
+    assignLoadingEmpId: null,
+    // Tracks service transaction submit loading (Record Service page)
+    svcSubmitting: false,
+    // Approver CRUD modal
+    approverModal: { open:false, isEdit:false, loading:false, form:{ id:'', name:'', title:'', phone:'', email:'', is_default:false } },
+
+    // NEW: Service report type catalog (by-type preview/download flow)
+    serviceReportTypes: [
+      { type: 'daily', label: 'Service Daily', desc: "Raporo y'abakiriya y'umunsi", icon: 'bx bx-calendar-day', color: 'text-brand-purple', bg: 'bg-brand-purple/10' },
+      { type: 'weekly', label: 'Service Weekly', desc: "Raporo y'abakiriya y'icyumweru", icon: 'bx bx-calendar-week', color: 'text-brand-gold', bg: 'bg-brand-gold/10' },
+      { type: 'monthly', label: 'Service Monthly', desc: "Raporo y'abakiriya y'ukwezi", icon: 'bx bx-calendar', color: 'text-brand-emerald', bg: 'bg-brand-emerald/10' },
+      { type: 'yearly', label: 'Service Yearly', desc: "Raporo y'abakiriya y'umwaka", icon: 'bx bx-calendar-star', color: 'text-brand-info', bg: 'bg-brand-info/10' },
+    ],
+    // NEW: tracks which report type is currently being generated/downloaded (null when idle)
+    reportLoading: null,
+    // Reset state — granular target selection
+    resetting: false,
+    resetResult: null,
+    resetTargets: [],
+    resetTargetOptions: [
+      { key: 'products',             label: 'Products',              desc: 'Siba ibicuruzwa byose (inventory + prices)', icon: 'bx bx-package',     color: 'text-brand-gold' },
+      { key: 'transactions',         label: 'Transactions',          desc: 'Siba amayoteri yose (sales + purchases + items)', icon: 'bx bx-cart',  color: 'text-brand-emerald' },
+      { key: 'services',             label: 'Services',              desc: 'Siba serivise zose ziyandikwa', icon: 'bx bx-briefcase',   color: 'text-brand-purple' },
+      { key: 'service_transactions', label: 'Service Transactions',  desc: 'Siba amayoteri ya serivise gusa', icon: 'bx bx-briefcase-alt', color: 'text-brand-info' },
+      { key: 'employee_assignments', label: 'Employee Assignments',  desc: 'Siba gusa amatora y\u2019abakozi (products/services)', icon: 'bx bx-list-check', color: 'text-brand-gold' },
+      { key: 'employees',            label: 'Employees',             desc: 'Siba abakozi bose (Owner akomeza) + assignments zabo', icon: 'bx bx-group', color: 'text-brand-emerald' },
+      { key: 'approvers_mapping',    label: 'Approver Assignments',  desc: 'Siba uwahawe approver buri mukozi (approvers list ikomeza)', icon: 'bx bx-user-check', color: 'text-brand-purple' },
+      { key: 'reports',              label: 'PDF Reports',           desc: 'Siba PDF reports zose zahanditswe (data ikomeza)', icon: 'bx bx-file', color: 'text-red-400' },
+      { key: 'sessions',             label: 'Login Sessions',        desc: 'Siba session z\u2019abandi bose (bongera baguruke)', icon: 'bx bx-log-out', color: 'text-red-400' },
+    ],
+
+    // ---- computed ----
+    get isOwner() { return (this.user?.role || '').toUpperCase() === 'OWNER'; },
+    get pageTitle() {
+      const map = {
+        dashboard:'Dashboard', inventory:'Inventory', services:'Service Business',
+        employees:'Employees', analytics:'Analytics', reports:'Reports (PDF)',
+        settings:'Settings',
+        pos:'Point of Sale', record_service:'Record Service', my_history:'My History'
+      };
+      return map[this.page] || 'Dashboard';
+    },
+    get kpiCards() {
+      const k = this.kpis || {};
+      return [
+        { label:'Total Products', value:this.fmt(k.total_products), sub:'In stock', icon:'bx bx-package', color:'#FFB020' },
+        { label:"Today's Sales", value:this.fmtMoney(k.todays_sales), sub:`${k.todays_transactions||0} tx`, icon:'bx bx-cart', color:'#00E599' },
+        { label:"Today's Profit", value:this.fmtMoney(k.todays_profit), sub:'Net', icon:'bx bx-line-chart', color:'#A855F7' },
+        { label:'Stock Value', value:this.fmtMoney(k.stock_value), sub:`Cost ${this.fmtMoney(k.stock_cost)}`, icon:'bx bx-box', color:'#FFB020' },
+        { label:'Total Sales', value:this.fmtMoney(k.total_sales), sub:'All time', icon:'bx bx-dollar-circle', color:'#00E599' },
+        { label:'Total Profit', value:this.fmtMoney(k.total_profit), sub:'All time', icon:'bx bx-trending-up', color:'#A855F7' },
+        { label:'Service Clients', value:this.fmt(k.total_svc_clients), sub:`Rev ${this.fmtMoney(k.total_svc_revenue)}`, icon:'bx bx-group', color:'#FFB020' },
+        { label:'Active Employees', value:this.fmt(k.active_employees), sub:'Working', icon:'bx bx-user-check', color:'#00E599' },
+      ];
+    },
+    get filteredProducts() {
+      const s = (this.productSearch||'').toLowerCase();
+      if (!s) return this.products;
+      return this.products.filter(p =>
+        (p.name||'').toLowerCase().includes(s) ||
+        (p.sku||'').toLowerCase().includes(s) ||
+        (p.category||'').toLowerCase().includes(s)
+      );
+    },
+    get cartTotal() { return this.cart.reduce((s,it)=>s + (Number(it.quantity)||0)*(Number(it.unit_price)||0), 0); },
+    get resetSelectedCount() { return this.resetTargets.length; },
+    get resetTargetsAll() {
+      return this.resetTargetOptions.length > 0 &&
+             this.resetTargets.length === this.resetTargetOptions.length;
+    },
+    get anyModalOpen() {
+      return this.confirmModal.open || this.forgotModal || this.previewModal.open ||
+             this.bulkModal || this.assignModal.open || this.productModal.open ||
+             this.serviceModal.open || this.employeeModal.open;
+    },
+    get productReports() {
+      return [
+        { key:'daily', title:'Daily', desc:'Imbonerahamwe ya buri munsi', icon:'bx bx-file', url:'/generate_daily' },
+        { key:'weekly', title:'Weekly', desc:"Icyumweru (block format)", icon:'bx bx-calendar-week', url:'/generate_weekly' },
+        { key:'monthly', title:'Monthly', desc:"Ukwezi (block format)", icon:'bx bx-calendar', url:'/generate_monthly' },
+        { key:'yearly', title:'Yearly', desc:"Umwaka (6-month blocks)", icon:'bx bx-calendar-star', url:'/generate_yearly' },
+      ];
+    },
+    get serviceReports() {
+      return [
+        { key:'svc_daily', title:'Daily', desc:'Serivise za buri munsi', icon:'bx bx-file', url:'/generate_service_daily' },
+        { key:'svc_weekly', title:'Weekly', desc:'Serivise zicyumweru', icon:'bx bx-calendar-week', url:'/generate_service_weekly' },
+        { key:'svc_monthly', title:'Monthly', desc:'Serivise zukwezi', icon:'bx bx-calendar', url:'/generate_service_monthly' },
+        { key:'svc_yearly', title:'Yearly', desc:'Serivise zumwaka', icon:'bx bx-calendar-star', url:'/generate_service_yearly' },
+      ];
+    },
+
+    // ---- lifecycle ----
+    async init() {
+      this.tickClock();
+      setInterval(() => this.tickClock(), 1000);
+      // Restore saved carts
+      try { this.savedCarts = JSON.parse(localStorage.getItem('tj_saved_carts') || '[]'); } catch { this.savedCarts = []; }
+      // Restore cart
+      try { this.cart = JSON.parse(localStorage.getItem('tj_cart') || '[]'); } catch { this.cart = []; }
+
+      // Load UI translations EARLY so all UI text uses dictionary values
+      // (does not require authentication — GET endpoint is public)
+      this.loadTranslations();
+
+      // Check existing session
+      try {
+        const r = await fetch('/api/auth/session', { credentials:'include' });
+        const j = await r.json();
+        if (j.authenticated) {
+          this.user = j.user;
+          this.page = this.isOwner ? 'dashboard' : 'pos';
+          await this.afterLogin();
+        }
+      } catch {}
+
+      // Auto-refresh data every 60s
+      setInterval(() => { if (this.user) this.refreshData(); }, 60000);
+    },
+
+    tickClock() {
+      const d = new Date();
+      this.clock = d.toLocaleTimeString();
+      this.todayLabel = d.toLocaleDateString(undefined,{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    },
+
+    // ---- auth ----
+    async doLogin() {
+      this.loading = true; this.loginError = '';
+      try {
+        const r = await fetch('/api/auth/login', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          credentials:'include',
+          body: JSON.stringify(this.loginForm)
+        });
+        const j = await r.json();
+        if (!r.ok) { this.loginError = j.error || 'Login failed'; return; }
+        this.user = j.user;
+        this.page = this.isOwner ? 'dashboard' : 'pos';
+        await this.afterLogin();
+        this.toast('Welcome, ' + (this.user.name||this.user.username), 'success');
+      } catch (e) {
+        this.loginError = 'Network error';
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    async doLogout() {
+      try { await fetch('/api/auth/logout', { method:'POST', credentials:'include' }); } catch {}
+      this.user = null;
+      this.page = 'dashboard';
+      this.loginForm = { username:'', password:'' };
+      this.toast('Bye!', 'info');
+    },
+
+    // ===== Session-expired handler — stops polling + forces re-login =====
+    handleSessionExpired() {
+      if (!this.user) return;
+      this.user = null;
+      this.page = 'dashboard';
+      this.loginForm = { username:'', password:'' };
+      this.toast('Session yarangiye. Ongera winjire.', 'error');
+    },
+
+    // Wrapper around fetch that auto-handles 401 (session expired)
+    async apiFetch(url, opts = {}) {
+      const r = await fetch(url, { credentials:'include', ...opts });
+      if (r.status === 401) {
+        this.handleSessionExpired();
+        throw new Error('Session expired');
+      }
+      return r;
+    },
+
+    // ===== UI Translations helper =====
+    // tr(key, fallback?) → returns translations[key] or fallback or key
+    tr(key, fallback = null) {
+      const v = this.translations[key];
+      if (v && typeof v === 'string' && v.length > 0) return v;
+      return fallback || key;
+    },
+
+    // Load translations from /api/translations (called at init)
+    async loadTranslations() {
+      try {
+        const r = await fetch('/api/translations', { credentials:'include' });
+        if (r.ok) {
+          this.translations = await r.json();
+          // Remove the _comment key so it doesn't clutter the editor
+          delete this.translations._comment;
+          // Initialize editing copy
+          this.translationsEditing = JSON.parse(JSON.stringify(this.translations));
+        }
+      } catch(e) {
+        console.warn('Failed to load translations:', e);
+      }
+    },
+
+    // Save edited translations back to server
+    async saveTranslations() {
+      this.translationsLoading = true;
+      try {
+        const r = await this.apiFetch('/api/translations', {
+          method:'PUT', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(this.translationsEditing)
+        });
+        const j = await r.json();
+        if (r.ok && j.ok) {
+          // Apply changes immediately to the live translations object
+          this.translations = JSON.parse(JSON.stringify(this.translationsEditing));
+          this.toast(`Byagenze neza! ${j.updated} updated, ${j.added_new} new. Total: ${j.total_keys}.`, 'success');
+        } else {
+          this.toast(j.error || 'Byanze', 'error');
+        }
+      } catch(e) {
+        this.toast('Network error', 'error');
+      } finally {
+        this.translationsLoading = false;
+      }
+    },
+
+    // Reset working copy to current saved values (discard changes)
+    resetTranslationsEditing() {
+      this.translationsEditing = JSON.parse(JSON.stringify(this.translations));
+      this.toast('Byagaruriwe — amahinduka yasibwe', 'info');
+    },
+
+    // Computed: filtered list of translation keys for the editor (search-filtered)
+    get translationsFiltered() {
+      const s = (this.translationsSearch || '').toLowerCase();
+      const entries = Object.entries(this.translationsEditing);
+      if (!s) return entries.sort((a,b) => a[0].localeCompare(b[0]));
+      return entries
+        .filter(([k,v]) => k.toLowerCase().includes(s) || String(v).toLowerCase().includes(s))
+        .sort((a,b) => a[0].localeCompare(b[0]));
+    },
+
+    // ===== Owner Profile + Signature methods =====
+    async loadOwnerProfile() {
+      try {
+        const r = await this.apiFetch('/api/owner/profile');
+        if (r.ok) this.ownerProfile = await r.json();
+      } catch(e) {}
+    },
+    async saveOwnerProfile() {
+      this.ownerProfileLoading = true;
+      try {
+        const r = await this.apiFetch('/api/owner/profile', {
+          method:'PUT', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(this.ownerProfile)
+        });
+        const j = await r.json();
+        if (r.ok) {
+          this.toast("Amakuru y'ikigo n'uwuyafite byagenze neza!",'success');
+          // Update local user object so header/sidebar reflects new name
+          if (this.ownerProfile.owner_name && this.user) {
+            this.user.name = this.ownerProfile.owner_name;
+          }
+        } else {
+          this.toast(j.error || 'Byanze','error');
+        }
+      } catch(e) {
+        this.toast('Network error','error');
+      } finally {
+        this.ownerProfileLoading = false;
+      }
+    },
+    async changeOwnerPassword() {
+      if (this.ownerPasswordForm.new_password !== this.ownerPasswordForm.confirm) {
+        this.toast('Ijambo banga ntiryemera — rimwe na rimwe','error');
+        return;
+      }
+      if (this.ownerPasswordForm.new_password.length < 4) {
+        this.toast('Ijambo banga rigomba kugira ibyemezo 4 cyangwa byinshi','error');
+        return;
+      }
+      try {
+        const r = await this.apiFetch('/api/owner/password', {
+          method:'PUT', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ new_password: this.ownerPasswordForm.new_password })
+        });
+        if (r.ok) {
+          this.toast('Ijambo banga byahinduwe!','success');
+          this.ownerPasswordForm = { new_password:'', confirm:'' };
+        } else {
+          const j = await r.json().catch(()=>({}));
+          this.toast(j.error || 'Byanze','error');
+        }
+      } catch(e) {
+        this.toast('Network error','error');
+      }
+    },
+    async loadSignatureStatus() {
+      try {
+        const r = await this.apiFetch('/api/owner/signature');
+        if (r.ok) {
+          const j = await r.json();
+          this.signatureHas = !!j.has_signature;
+        }
+      } catch(e) {}
+    },
+    async saveSignature() {
+      const canvas = this.$refs.sigCanvas;
+      if (!canvas) { this.toast('Canvas ntibonetse','error'); return; }
+      // Check if canvas is empty (no signature drawn)
+      const ctx = canvas.getContext('2d');
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let hasInk = false;
+      for (let i = 3; i < imgData.length; i += 4) {
+        if (imgData[i] > 0) { hasInk = true; break; }
+      }
+      if (!hasInk) {
+        this.toast('Andika isinya mbere yo kubika (draw your signature first)','error');
+        return;
+      }
+      this.signatureSaving = true;
+      try {
+        const dataUrl = canvas.toDataURL('image/png');
+        const r = await this.apiFetch('/api/owner/signature', {
+          method:'PUT', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ png_base64: dataUrl })
+        });
+        if (r.ok) {
+          this.signatureHas = true;
+          this.toast('Isinya byagenze neza! Bizagaragara muri raporo zose.','success');
+        } else {
+          this.toast('Byanze','error');
+        }
+      } catch(e) {
+        this.toast('Network error','error');
+      } finally {
+        this.signatureSaving = false;
+      }
+    },
+    clearSigCanvas() {
+      const canvas = this.$refs.sigCanvas;
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Fill with white so the saved PNG has a clean background
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    },
+    initSigCanvas() {
+      const canvas = this.$refs.sigCanvas;
+      if (!canvas) return;
+      // Set canvas size based on its CSS size
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = 180;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      let drawing = false;
+      let last = null;
+      const pos = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const t = e.touches ? e.touches[0] : e;
+        return { x: t.clientX - r.left, y: t.clientY - r.top };
+      };
+      const start = (e) => {
+        e.preventDefault();
+        drawing = true;
+        last = pos(e);
+      };
+      const move = (e) => {
+        if (!drawing) return;
+        e.preventDefault();
+        const p = pos(e);
+        ctx.beginPath();
+        ctx.moveTo(last.x, last.y);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        last = p;
+      };
+      const end = () => { drawing = false; last = null; };
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      canvas.addEventListener('mouseup', end);
+      canvas.addEventListener('mouseleave', end);
+      canvas.addEventListener('touchstart', start);
+      canvas.addEventListener('touchmove', move);
+      canvas.addEventListener('touchend', end);
+    },
+
+    // ===== Employee + Approver Signature methods =====
+    async loadMySignature() {
+      try {
+        const r = await this.apiFetch('/api/employees/my-signature');
+        if (r.ok) {
+          const j = await r.json();
+          this.mySignature = {
+            has: !!j.has_signature,
+            png_base64: j.png_base64 || '',
+            name: j.name || '',
+            signed_at: j.signed_at || '',
+          };
+        }
+      } catch(e) {}
+    },
+
+    // Generic canvas-based signature save. canvasRef is the x-ref of the canvas.
+    // endpointUrl is the PUT endpoint to call. bodyKey is the field name (defaults to 'png_base64').
+    async _saveSigFromCanvas(canvasRef, endpointUrl, extraBody = {}) {
+      const canvas = this.$refs[canvasRef];
+      if (!canvas) { this.toast('Canvas ntibonetse', 'error'); return false; }
+      const ctx = canvas.getContext('2d');
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let hasInk = false;
+      for (let i = 3; i < imgData.length; i += 4) {
+        if (imgData[i] > 0) { hasInk = true; break; }
+      }
+      if (!hasInk) {
+        this.toast('Andika isinya mbere ho kubika (draw your signature first)', 'error');
+        return false;
+      }
+      try {
+        const dataUrl = canvas.toDataURL('image/png');
+        const body = { png_base64: dataUrl, ...extraBody };
+        const r = await this.apiFetch(endpointUrl, {
+          method:'PUT', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(body)
+        });
+        if (r.ok) return true;
+        this.toast('Byanze', 'error');
+      } catch(e) {
+        this.toast('Network error', 'error');
+      }
+      return false;
+    },
+
+    async saveMySignature() {
+      this.mySigSaving = true;
+      try {
+        const ok = await this._saveSigFromCanvas('mySigCanvas', '/api/employees/my-signature');
+        if (ok) {
+          this.mySignature.has = true;
+          this.toast('Isinya yawe yabitswe! Izajya muri raporo zose.', 'success');
+          await this.loadMySignature();
+        }
+      } finally {
+        this.mySigSaving = false;
+      }
+    },
+
+    clearSigCanvasByName(refName) {
+      const canvas = this.$refs[refName];
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    },
+
+    // Initialize a generic signature canvas by ref name
+    initSigCanvasByName(refName) {
+      const canvas = this.$refs[refName];
+      if (!canvas) return;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = 180;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#000000';
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      let drawing = false;
+      let last = null;
+      const pos = (e) => {
+        const r = canvas.getBoundingClientRect();
+        const t = e.touches ? e.touches[0] : e;
+        return { x: t.clientX - r.left, y: t.clientY - r.top };
+      };
+      const start = (e) => { e.preventDefault(); drawing = true; last = pos(e); };
+      const move = (e) => {
+        if (!drawing) return;
+        e.preventDefault();
+        const p = pos(e);
+        ctx.beginPath();
+        ctx.moveTo(last.x, last.y);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        last = p;
+      };
+      const end = () => { drawing = false; last = null; };
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      canvas.addEventListener('mouseup', end);
+      canvas.addEventListener('mouseleave', end);
+      canvas.addEventListener('touchstart', start);
+      canvas.addEventListener('touchmove', move);
+      canvas.addEventListener('touchend', end);
+    },
+
+    // Load all approver signatures (Owner)
+    async loadApproverSigs() {
+      this.approverSigsLoading = true;
+      try {
+        // Make sure approvers list is loaded first
+        if (this.approversList.length === 0) {
+          const ar = await this.apiFetch('/api/approvers');
+          if (ar.ok) this.approversList = await ar.json();
+        }
+        // Load each approver's signature
+        for (const a of this.approversList) {
+          try {
+            const r = await this.apiFetch(`/api/approvers/${a.id}/signature`);
+            if (r.ok) {
+              const j = await r.json();
+              this.approverSigs[a.id] = {
+                has: !!j.has_signature,
+                png_base64: j.png_base64 || '',
+                name: j.name || a.name,
+                signed_at: j.signed_at || '',
+              };
+            }
+          } catch(e) {}
+        }
+      } finally {
+        this.approverSigsLoading = false;
+      }
+    },
+
+    async saveApproverSig(aid) {
+      try {
+        const ok = await this._saveSigFromCanvas(
+          'apprSigCanvas_' + aid,
+          `/api/approvers/${aid}/signature`
+        );
+        if (ok) {
+          if (!this.approverSigs[aid]) this.approverSigs[aid] = {};
+          this.approverSigs[aid].has = true;
+          const approver = this.approversList.find(x => x.id === aid);
+          this.toast(`Isinya ya ${approver ? approver.name : 'approver'} yabitswe!`, 'success');
+          // Refresh
+          await this.loadApproverSigs();
+        }
+      } catch(e) {
+        this.toast('Network error', 'error');
+      }
+    },
+
+    // ===== Approver CRUD (Add / Edit / Delete) =====
+    openApproverModal(a = null) {
+      if (a) {
+        // Edit existing
+        this.approverModal = {
+          open: true,
+          isEdit: true,
+          loading: false,
+          form: {
+            id: a.id,
+            name: a.name || '',
+            title: a.title || '',
+            phone: a.phone || '',
+            email: a.email || '',
+            is_default: !!a.is_default,
+          }
+        };
+      } else {
+        // Add new
+        this.approverModal = {
+          open: true,
+          isEdit: false,
+          loading: false,
+          form: { id:'', name:'', title:'', phone:'', email:'', is_default:false }
+        };
+      }
+    },
+
+    async saveApprover() {
+      const f = this.approverModal.form;
+      if (!f.name || !f.name.trim()) {
+        this.toast('Andika amazina (Name is required)', 'error');
+        return;
+      }
+      this.approverModal.loading = true;
+      try {
+        const body = {
+          name: f.name.trim(),
+          title: f.title.trim(),
+          phone: f.phone.trim(),
+          email: f.email.trim(),
+          is_default: !!f.is_default,
+        };
+        let r;
+        if (this.approverModal.isEdit) {
+          r = await this.apiFetch(`/api/approvers/${f.id}`, {
+            method:'PUT', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify(body)
+          });
+        } else {
+          r = await this.apiFetch('/api/approvers', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify(body)
+          });
+        }
+        const j = await r.json();
+        if (r.ok && j.ok) {
+          this.toast(this.approverModal.isEdit ? 'Approver yahinduwe neza!' : 'Approver yongereye neza!', 'success');
+          this.approverModal.open = false;
+          // Refresh approvers list + signatures
+          await this.loadApproversList();
+          await this.loadApproverSigs();
+        } else {
+          this.toast(j.error || 'Byanze', 'error');
+        }
+      } catch(e) {
+        if (e.message === 'Session expired') return;
+        this.toast('Network error', 'error');
+      } finally {
+        this.approverModal.loading = false;
+      }
+    },
+
+    async loadApproversList() {
+      try {
+        const r = await this.apiFetch('/api/approvers');
+        if (r.ok) this.approversList = await r.json();
+      } catch(e) {}
+    },
+
+    deleteApprover(a) {
+      if (a.is_default) {
+        this.toast('Ntushobora gusiba approver default! Hitamo undi mubanze ube default.', 'error');
+        return;
+      }
+      this.confirmModal = {
+        open: true,
+        title: 'Siba Approver',
+        message: `Urakeneye gusiba "${a.name}"? Abakozi bagenewe we bazasubira kuri default approver.`,
+        confirmText: 'Ego, Siba',
+        confirmClass: 'bg-red-600 text-white',
+        requireInput: null,
+        loading: false,
+        onConfirm: async () => {
+          try {
+            const r = await this.apiFetch(`/api/approvers/${a.id}`, {
+              method:'DELETE'
+            });
+            const j = await r.json();
+            if (r.ok && j.ok) {
+              this.toast(`"${a.name}" yasibwe!`, 'success');
+              await this.loadApproversList();
+              await this.loadApproverSigs();
+            } else {
+              this.toast(j.error || 'Byanze', 'error');
+            }
+          } catch(e) {
+            if (e.message === 'Session expired') return;
+            this.toast('Network error', 'error');
+          }
+        }
+      };
+    },
+
+    async afterLogin() {
+      await this.refreshData();
+      if (this.isOwner) {
+        this.$nextTick(() => this.renderCharts());
+        // Pre-load owner profile + signature status (used in Settings page)
+        this.loadOwnerProfile();
+        this.loadSignatureStatus();
+      } else {
+        // Employee: load their signature (used on POS page)
+        this.loadMySignature();
+      }
+    },
+
+    async refreshData() {
+      if (!this.user) return;
+      if (this.isOwner) {
+        await Promise.all([
+          this.loadProducts(),
+          this.loadServices(),
+          this.loadEmployees(),
+          this.loadDashboard(),
+          this.loadServiceDashboard(),
+          this.loadTransactions(),
+          this.loadSvcTransactions(),
+        ]);
+        this.$nextTick(() => this.renderCharts());
+      } else {
+        await Promise.all([
+          this.loadProducts(),
+          this.loadServices(),
+          this.loadTransactions(),
+          this.loadSvcTransactions(),
+        ]);
+      }
+    },
+
+    goto(p) {
+      this.page = p;
+      this.sidebarOpen = false;
+      if (this.isOwner && (p==='dashboard' || p==='analytics')) {
+        this.$nextTick(() => this.renderCharts());
+      }
+      if (this.isOwner && p==='settings') {
+        this.$nextTick(() => this.initSigCanvas());
+      }
+    },
+
+    // ---- data loaders ----
+    async loadProducts() {
+      try {
+        const r = await this.apiFetch('/api/products');
+        if (r.ok) this.products = await r.json();
+      } catch(e) {}
+    },
+    async loadServices() {
+      try {
+        const r = await this.apiFetch('/api/services');
+        if (r.ok) this.services = await r.json();
+      } catch(e) {}
+    },
+    async loadEmployees() {
+      try {
+        const r = await this.apiFetch('/api/employees');
+        if (r.ok) {
+          const fresh = await r.json();
+          console.log('[loadEmployees] got', fresh.length, 'employees');
+          this.employees = fresh;
+        } else {
+          console.warn('[loadEmployees] HTTP', r.status);
+        }
+      } catch(e) {
+        if (e.message === 'Session expired') return;
+        console.error('[loadEmployees] error:', e);
+      }
+    },
+    async loadTransactions() {
+      try {
+        const r = await this.apiFetch('/api/transactions?limit=200');
+        if (r.ok) this.transactions = await r.json();
+      } catch(e) {}
+    },
+    async loadSvcTransactions() {
+      try {
+        const r = await this.apiFetch('/api/service-transactions?limit=200');
+        if (r.ok) this.svcTransactions = await r.json();
+      } catch(e) {}
+    },
+    async loadDashboard() {
+      try {
+        const r = await this.apiFetch('/api/dashboard');
+        if (r.ok) {
+          const j = await r.json();
+          this.kpis = j.kpis || {};
+          this.charts = j.charts || { sales_last_7_days:[], top_products:[], sales_by_category:[], profit_trend:[] };
+        }
+      } catch(e) {}
+    },
+    async loadServiceDashboard() {
+      try {
+        const r = await this.apiFetch('/api/service-dashboard');
+        if (r.ok) this.svcStats = await r.json();
+      } catch(e) {}
+    },
+
+    // ---- product ops ----
+    openProductModal(p=null) {
+      if (p) {
+        this.productModal = { open:true, isEdit:true, form:{...p} };
+      } else {
+        this.productModal = { open:true, isEdit:false, form:{name:'',sku:'',category:'',quantity:0,unit_price:0,cost_price:0,hidden:false} };
+      }
+    },
+    async saveProduct() {
+      this.busy = true;
+      try {
+        const f = this.productModal.form;
+        if (!f.name) { this.toast('Name required','error'); return; }
+        let r;
+        if (this.productModal.isEdit) {
+          r = await fetch('/api/products/'+f.id, {
+            method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include',
+            body: JSON.stringify({ name:f.name, sku:f.sku, category:f.category, quantity:f.quantity, unit_price:f.unit_price, cost_price:f.cost_price, hidden:f.hidden })
+          });
+        } else {
+          r = await fetch('/api/products', {
+            method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+            body: JSON.stringify({ name:f.name, sku:f.sku, category:f.category, quantity:f.quantity, unit_price:f.unit_price, cost_price:f.cost_price, hidden:f.hidden })
+          });
+        }
+        if (r.ok) {
+          this.productModal.open = false;
+          this.toast('Product saved','success');
+          await this.loadProducts();
+        } else this.toast('Save failed','error');
+      } finally { this.busy = false; }
+    },
+    async toggleHide(p) {
+      const r = await fetch('/api/products/'+p.id, {
+        method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include',
+        body: JSON.stringify({ hidden: !p.hidden })
+      });
+      if (r.ok) { await this.loadProducts(); this.toast(p.hidden?'Shown':'Hidden','info'); }
+    },
+
+    // ===== CRITICAL: deleteProduct uses confirmModal =====
+    deleteProduct(p) {
+      this.confirmModal = {
+        open: true,
+        title: 'Siba Igicuruzwa',
+        message: `Urashaka koynza gusiba "${p.name}"? Ibi ntibizagarurwa.`,
+        confirmText: 'Ego, Siba',
+        confirmClass: 'btn-danger',
+        requireInput: null,
+        loading: false,
+        onConfirm: async () => {
+          const r = await fetch('/api/products/'+p.id, { method:'DELETE', credentials:'include' });
+          if (r.ok) {
+            this.toast('Product deleted','success');
+            await this.loadProducts();
+          } else {
+            const j = await r.json().catch(()=>({}));
+            this.toast(j.error || 'Delete failed','error');
+          }
+        }
+      };
+    },
+
+    // ---- service ops ----
+    openServiceModal(s=null) {
+      if (s) {
+        this.serviceModal = { open:true, isEdit:true, form:{...s} };
+      } else {
+        this.serviceModal = { open:true, isEdit:false, form:{name:'',description:'',default_price:0,active:true} };
+      }
+    },
+    async saveService() {
+      this.busy = true;
+      try {
+        const f = this.serviceModal.form;
+        if (!f.name) { this.toast('Name required','error'); return; }
+        let r;
+        if (this.serviceModal.isEdit) {
+          r = await fetch('/api/services/'+f.id, {
+            method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include',
+            body: JSON.stringify({ name:f.name, description:f.description, default_price:f.default_price, active:f.active })
+          });
+        } else {
+          r = await fetch('/api/services', {
+            method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+            body: JSON.stringify({ name:f.name, description:f.description, default_price:f.default_price, active:f.active })
+          });
+        }
+        if (r.ok) { this.serviceModal.open = false; this.toast('Service saved','success'); await this.loadServices(); }
+        else this.toast('Save failed','error');
+      } finally { this.busy = false; }
+    },
+    // ===== CRITICAL: deleteService uses confirmModal =====
+    deleteService(s) {
+      this.confirmModal = {
+        open: true,
+        title: 'Siba Serivise',
+        message: `Urashaka koynza gusiba "${s.name}"?`,
+        confirmText: 'Ego, Siba',
+        confirmClass: 'btn-danger',
+        requireInput: null,
+        loading: false,
+        onConfirm: async () => {
+          const r = await fetch('/api/services/'+s.id, { method:'DELETE', credentials:'include' });
+          if (r.ok) { this.toast('Service deleted','success'); await this.loadServices(); }
+          else { const j = await r.json().catch(()=>({})); this.toast(j.error||'Delete failed','error'); }
+        }
+      };
+    },
+
+    // ---- employee ops ----
+    openEmployeeModal(e=null) {
+      if (e) {
+        this.employeeModal = { open:true, isEdit:true, form:{...e, password:''} };
+      } else {
+        this.employeeModal = { open:true, isEdit:false, form:{name:'',username:'',password:'',phone:'',email:'',active:true} };
+      }
+    },
+    async saveEmployee() {
+      this.busy = true;
+      try {
+        const f = this.employeeModal.form;
+        if (!f.name || !f.username) { this.toast('Name and username required','error'); return; }
+        let r;
+        if (this.employeeModal.isEdit) {
+          const body = { name:f.name, phone:f.phone, email:f.email, active:f.active };
+          if (f.password) body.password = f.password;
+          r = await fetch('/api/employees/'+f.id, {
+            method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include',
+            body: JSON.stringify(body)
+          });
+        } else {
+          if (!f.password) { this.toast('Password required','error'); return; }
+          r = await fetch('/api/employees', {
+            method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+            body: JSON.stringify({ name:f.name, username:f.username, password:f.password, phone:f.phone, email:f.email, active:f.active })
+          });
+        }
+        if (r.ok) { this.employeeModal.open = false; this.toast('Employee saved','success'); await this.loadEmployees(); }
+        else this.toast('Save failed','error');
+      } finally { this.busy = false; }
+    },
+    // ===== CRITICAL: toggleEmployeeActive uses confirmModal =====
+    toggleEmployeeActive(e) {
+      const enabling = !e.active;
+      this.confirmModal = {
+        open: true,
+        title: enabling ? 'Ongera Ufungure' : 'Hagarika Umukozi',
+        message: enabling
+          ? `Ongera ufungure konti ya "${e.name}"?`
+          : `Hagarika konti ya "${e.name}"? (Ushobora kongera gufungura nyuma)`,
+        confirmText: enabling ? 'Ego, Fungura' : 'Ego, Hagarika',
+        confirmClass: enabling ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white',
+        requireInput: null,
+        loading: false,
+        onConfirm: async () => {
+          this.busy = true;
+          try {
+            console.log('[toggleEmployeeActive] PUT /api/employees/'+e.id, { active: enabling });
+            const r = await fetch('/api/employees/'+e.id, {
+              method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include',
+              body: JSON.stringify({ active: enabling })
+            });
+            console.log('[toggleEmployeeActive] response status:', r.status);
+            if (r.ok) {
+              this.toast(enabling ? 'Umukozi yongere gufungura' : 'Umukozi yahagaritswe','success');
+              // OPTIMISTIC UPDATE: immediately flip the active state in the local
+              // employees array so the UI reflects the change right away, even
+              // before loadEmployees() finishes (or if it fails silently).
+              const idx = this.employees.findIndex(x => x.id === e.id);
+              if (idx >= 0) {
+                this.employees[idx].active = enabling;
+                // Force Alpine to react by re-assigning the array
+                this.employees = [...this.employees];
+                console.log('[toggleEmployeeActive] optimistic update done, employees['+idx+'].active =', enabling);
+              }
+              // Then refresh from server in background to confirm
+              await this.loadEmployees();
+              console.log('[toggleEmployeeActive] loadEmployees done');
+            } else {
+              const j = await r.json().catch(()=>({}));
+              console.error('[toggleEmployeeActive] PUT failed:', j);
+              this.toast(j.error || 'Action failed','error');
+            }
+          } catch(err) {
+            console.error('[toggleEmployeeActive] network/JS error:', err);
+            this.toast('Network error: ' + err.message,'error');
+          } finally {
+            this.busy = false;
+          }
+        }
+      };
+    },
+
+    // ---- assignments ----
+    async openAssignmentModal(emp) {
+      // Set loading state on the Assign button so user sees immediate feedback
+      this.assignLoadingEmpId = emp.id;
+      try {
+        this.assignModal.employee = emp;
+        this.assignModal.product_ids = [];
+        this.assignModal.service_ids = [];
+        this.assignModal.approver_id = '';
+        // Load approvers list if not already loaded
+        if (this.approversList.length === 0) {
+          try {
+            const ar2 = await this.apiFetch('/api/approvers');
+            if (ar2.ok) this.approversList = await ar2.json();
+          } catch(e) {}
+        }
+        // Need the full list (owner sees all) — reload to be safe
+        const [pr, sr] = await Promise.all([
+          this.apiFetch('/api/products').then(r=>r.json()),
+          this.apiFetch('/api/services').then(r=>r.json()),
+        ]);
+        this.allProductsForAssign = pr;
+        this.allServicesForAssign = sr;
+        // Load current assignments
+        const ar = await this.apiFetch(`/api/employees/${emp.id}/assignments`);
+        if (ar.ok) {
+          const a = await ar.json();
+          this.assignModal.product_ids = (a.products||[]).map(x=>x.product_id);
+          this.assignModal.service_ids = (a.services||[]).map(x=>x.service_id);
+          this.assignModal.approver_id = a.approver_id || '';
+        }
+        this.assignModal.open = true;
+      } catch (e) {
+        if (e.message === 'Session expired') return;
+        this.toast('Habitaye ikibazo mu kuzana amakuru', 'error');
+      } finally {
+        this.assignLoadingEmpId = null;
+      }
+    },
+    async saveAssignments() {
+      this.busy = true;
+      try {
+        const emp = this.assignModal.employee;
+        const r = await fetch(`/api/employees/${emp.id}/assignments`, {
+          method:'PUT', headers:{'Content-Type':'application/json'}, credentials:'include',
+          body: JSON.stringify({
+            product_ids:this.assignModal.product_ids,
+            service_ids:this.assignModal.service_ids,
+            approver_id:this.assignModal.approver_id || '',
+          })
+        });
+        if (r.ok) { this.assignModal.open = false; this.toast('Assignments n\'approver byagenze neza','success'); }
+        else this.toast('Save failed','error');
+      } catch (e) {
+        this.toast('Network error during save','error');
+      } finally { this.busy = false; }
+    },
+
+    // Issue 4: Remove ALL assignments for the current employee by clearing
+    // the local selection and re-saving (server deletes all + appends none).
+    async clearAssignments() {
+      if (!this.assignModal.employee) return;
+      if (!confirm(`Kuraho byose assignments za "${this.assignModal.employee.name}"?`)) return;
+      this.assignModal.product_ids = [];
+      this.assignModal.service_ids = [];
+      await this.saveAssignments();
+    },
+
+    // ---- bulk ----
+    async submitBulk() {
+      this.busy = true;
+      try {
+        const products = this.bulkRows.filter(r => r.name && r.name.trim());
+        if (!products.length) { this.toast('Add at least one valid row','error'); return; }
+        const r = await fetch('/api/products/bulk', {
+          method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+          body: JSON.stringify({ products })
+        });
+        if (r.ok) {
+          this.bulkModal = false;
+          this.bulkRows = [{name:'',sku:'',category:'',quantity:0,unit_price:0,cost_price:0}];
+          this.toast('Bulk added','success');
+          await this.loadProducts();
+        } else this.toast('Bulk failed','error');
+      } finally { this.busy = false; }
+    },
+
+    // ---- POS ----
+    onCartProductChange() {
+      const p = this.products.find(x => x.id === this.cartForm.product_id);
+      if (p) this.cartForm.unit_price = p.unit_price;
+    },
+    // Quick-select a product from the POS quick-access grid (auto-fills the dropdown + qty + unit price)
+    quickSelectProduct(p) {
+      if (!p) return;
+      this.cartForm.product_id = p.id;
+      this.cartForm.quantity = (Number(this.cartForm.quantity) || 0) < 1 ? 1 : this.cartForm.quantity;
+      this.cartForm.unit_price = p.unit_price;
+      this.toast(`"${p.name}" picked — ${this.fmtMoney(p.unit_price)}`, 'info');
+    },
+    // Quick-select a service from the Record Service quick-access grid (auto-fills the dropdown + price/client)
+    quickSelectService(s) {
+      if (!s) return;
+      this.svcForm.service_id = s.id;
+      this.svcForm.price_per_client = s.default_price;
+      this.toast(`"${s.name}" picked — ${this.fmtMoney(s.default_price)}/client`, 'info');
+    },
+    addToCart() {
+      const p = this.products.find(x => x.id === this.cartForm.product_id);
+      if (!p) { this.toast('Pick a product','error'); return; }
+      const qty = Number(this.cartForm.quantity) || 0;
+      const up = Number(this.cartForm.unit_price) || 0;
+      if (qty < 1) { this.toast('Qty must be ≥ 1','error'); return; }
+      this.cart.push({
+        product_id: p.id, product_name: p.name,
+        quantity: qty, unit_price: up,
+        cost_price: p.cost_price || 0,
+      });
+      this.persistCart();
+      this.cartForm = { product_id:'', quantity:1, unit_price:0 };
+    },
+    clearCart() { this.cart = []; this.persistCart(); },
+    persistCart() { localStorage.setItem('tj_cart', JSON.stringify(this.cart)); },
+    saveCart() {
+      if (!this.cart.length) { this.toast('Cart is empty','error'); return; }
+      const name = 'Cart ' + new Date().toLocaleString();
+      this.savedCarts.push({ name, items: JSON.parse(JSON.stringify(this.cart)) });
+      this.persistCarts();
+      this.toast('Cart saved','success');
+    },
+    persistCarts() { localStorage.setItem('tj_saved_carts', JSON.stringify(this.savedCarts)); },
+    loadCart(i) {
+      this.cart = JSON.parse(JSON.stringify(this.savedCarts[i].items));
+      this.persistCart();
+      this.toast('Cart loaded','success');
+    },
+    async checkout() {
+      if (!this.cart.length) return;
+      // Require employee signature before checkout (so reports have a valid signature)
+      if (!this.isOwner && !this.mySignature.has) {
+        this.toast('Andika isinya yawe MBERE yo gukora checkout! (Sign your signature first)', 'error');
+        // Scroll to top so the signature panel is visible
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      this.busy = true;
+      try {
+        const r = await fetch('/api/transactions', {
+          method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include',
+          body: JSON.stringify({ type:this.posAction, items:this.cart, notes:this.checkoutNotes })
+        });
+        if (r.ok) {
+          this.toast(`Checkout done — ${this.posAction}`,'success');
+          this.cart = []; this.checkoutNotes = '';
+          this.persistCart();
+          await Promise.all([this.loadProducts(), this.loadTransactions()]);
+        } else {
+          const j = await r.json().catch(()=>({}));
+          this.toast(j.error || 'Checkout failed','error');
+        }
+      } finally { this.busy = false; }
+    },
+
+    // ---- service submit ----
+    onServiceChange() {
+      const s = this.services.find(x => x.id === this.svcForm.service_id);
+      if (s) this.svcForm.price_per_client = s.default_price;
+    },
+    async submitService() {
+      if (!this.svcForm.service_id) { this.toast('Hitamo serivise (Pick a service)','error'); return; }
+      if (!this.svcForm.num_clients || this.svcForm.num_clients < 1) { this.toast('Andika umubare w\'abakiriya','error'); return; }
+      this.svcSubmitting = true;
+      this.busy = true;
+      try {
+        const r = await this.apiFetch('/api/service-transactions', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(this.svcForm)
+        });
+        if (r.ok) {
+          this.toast('Serivise yanditswe neza!','success');
+          this.svcForm = { service_id:'', num_clients:1, price_per_client:0, notes:'' };
+          await this.loadSvcTransactions();
+        } else {
+          const j = await r.json().catch(()=>({}));
+          this.toast(j.error || 'Submit byanze','error');
+        }
+      } catch (e) {
+        if (e.message === 'Session expired') return;
+        this.toast('Habitaye ikibazo','error');
+      } finally {
+        this.busy = false;
+        this.svcSubmitting = false;
+      }
+    },
+
+    // ---- reports ----
+    async previewReport(url) {
+      // Fetch the PDF as a blob, then create an object URL so the iframe
+      // displays the PDF inline instead of triggering a download.
+      // The original URL is preserved in `title` for the Download button.
+      this.previewModal = { open: true, url: null, title: url, type: '', loading: true, error: null };
+      try {
+        const r = await fetch(url, { credentials: 'include' });
+        if (!r.ok) {
+          this.previewModal = { open: true, url: null, title: url, type: '', loading: false, error: 'HTTP ' + r.status };
+          return;
+        }
+        const blob = await r.blob();
+        const objUrl = URL.createObjectURL(blob);
+        this.previewModal = { open: true, url: objUrl, title: url, type: '', loading: false, error: null };
+      } catch(e) {
+        this.previewModal = { open: true, url: null, title: url, type: '', loading: false, error: 'Failed to load' };
+      }
+    },
+    async downloadReport(url) {
+      // Use fetch with credentials then trigger download via blob
+      try {
+        const r = await fetch(url, { credentials:'include' });
+        if (!r.ok) { this.toast('Failed to fetch','error'); return; }
+        const blob = await r.blob();
+        const a = document.createElement('a');
+        const objUrl = URL.createObjectURL(blob);
+        a.href = objUrl;
+        a.download = url.split('/').pop() + '.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(objUrl);
+      } catch (e) {
+        // Fallback: open in new tab
+        window.open(url, '_blank');
+      }
+    },
+
+    // ===== NEW: Service report (by type) preview/download =====
+    async previewServiceReport(type) {
+      this.previewModal = { open: true, url: null, type: 'service-'+type, loading: true, error: null };
+      this.reportLoading = type;
+      try {
+        const r = await fetch('/generate_service_'+type, { credentials: 'include' });
+        if (!r.ok) { this.previewModal = { open: true, url: null, type: 'service-'+type, loading: false, error: 'HTTP '+r.status }; return; }
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        this.previewModal = { open: true, url: url, type: 'service-'+type, loading: false, error: null };
+        this.toast('Service '+type.toUpperCase()+' preview ready.', 'success');
+      } catch(e) { this.previewModal = { open: true, url: null, type: 'service-'+type, loading: false, error: 'Habitaye ikibazo.' }; }
+      finally { this.reportLoading = null; }
+    },
+    async downloadServiceReport(type) {
+      this.reportLoading = type;
+      try {
+        const r = await fetch('/generate_service_'+type, { credentials: 'include' });
+        if (!r.ok) { this.toast('HTTP '+r.status, 'error'); return; }
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'T&J_Service_'+type+'_report.pdf';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
+        this.toast('Service '+type.toUpperCase()+' raporo yakuwe.', 'success');
+      } catch(e) { this.toast('Habitaye ikibazo.', 'error'); }
+      finally { this.reportLoading = null; }
+    },
+
+    // ===== NEW: Hard-delete an employee (irreversible) via confirmModal =====
+    async deleteEmployee(e) {
+      this.confirmModal = {
+        open: true,
+        title: 'Siba Umukozi (Hard Delete)',
+        message: 'WIBUKA GUHANAGURA "'+e.name+'"? Ibi NTIBISHOBORA KUGARURWA!',
+        confirmText: 'Siba for Good',
+        confirmClass: 'bg-brand-danger text-white',
+        requireInput: null,
+        loading: false,
+        onConfirm: async () => {
+          try {
+            const r = await fetch('/api/employees/'+e.id+'/hard-delete', { method:'POST', credentials:'include' });
+            if (r.ok) { this.toast('"'+e.name+'" yasibwe!', 'success'); await this.loadEmployees(); }
+            else { this.toast('Byanze.', 'error'); }
+          } catch(err) { this.toast('Habitaye ikibazo.', 'error'); }
+        }
+      };
+    },
+
+    // ===== Reset — granular (uses selected resetTargets) =====
+    toggleAllResetTargets(checked) {
+      if (checked) {
+        this.resetTargets = this.resetTargetOptions.map(o => o.key);
+      } else {
+        this.resetTargets = [];
+      }
+    },
+    resetSystem() {
+      const selected = [...this.resetTargets];
+      if (selected.length === 0) {
+        this.toast('Hitamo byona ibyo usiba (select at least one).', 'error');
+        return;
+      }
+      const labels = selected.map(k => {
+        const o = this.resetTargetOptions.find(x => x.key === k);
+        return o ? o.label : k;
+      });
+      const isAll = selected.length === this.resetTargetOptions.length;
+
+      // Stage 1: confirm reset
+      this.confirmModal = {
+        open: true,
+        title: isAll ? '⚠️ SIBA BYOSE (Wipe Everything)' : '⚠️ Siba: ' + labels.join(', '),
+        message: 'Urakeneye gusiba: ' + labels.join(', ') + '? Ibi NTIBISHOBORA KUGARURWA! Owner account uracyakomeza kubona.',
+        confirmText: 'Ego, jya muri Danger Zone',
+        confirmClass: 'bg-red-600 text-white',
+        requireInput: null,
+        loading: false,
+        onConfirm: () => {
+          // Stage 2: type RESET confirmation
+          this.confirmModal = {
+            open: true,
+            title: 'Andika "RESET" ngo wemeze',
+            message: 'Andika ikibaba "RESET" (capital letters) mu box below, hanyuma kanda Confirm.',
+            confirmText: 'Confirm Reset',
+            confirmClass: 'bg-red-700 text-white',
+            requireInput: 'RESET',
+            loading: false,
+            onConfirm: async () => {
+              this.resetting = true;
+              this.resetResult = null;
+              try {
+                const r = await fetch('/api/system/reset', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({
+                    confirm: 'RESET',
+                    targets: selected,
+                  })
+                });
+                const j = await r.json();
+                if (r.ok && j.ok) {
+                  this.resetResult = j.summary || { ok: true };
+                  this.toast('Byasibwa: ' + labels.join(', '), 'success');
+                  // Reload data caches in background
+                  await this.loadProducts();
+                  await this.loadEmployees();
+                  await this.loadServices();
+                  await this.loadTransactions();
+                  await this.loadSvcTransactions();
+                  await this.loadDashboard();
+                } else {
+                  this.toast(j.error || 'Reset byanze.', 'error');
+                }
+              } catch (e) {
+                this.toast('Habitaye ikibazo: ' + e.message, 'error');
+              } finally {
+                this.resetting = false;
+              }
+            }
+          };
+        }
+      };
+    },
+
+    // ---- forgot password ----
+    openForgot() {
+      this.forgotModal = true;
+      this.forgotMsg = '';
+      this.forgotForm = { identifier:'' };
+    },
+    async submitForgot() {
+      if (!this.forgotForm.identifier) { this.forgotMsg='Enter username or email'; this.forgotOk=false; return; }
+      try {
+        const r = await fetch('/api/auth/forgot-password', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(this.forgotForm)
+        });
+        const j = await r.json();
+        this.forgotMsg = j.message || (j.ok ? 'Sent':'Not found');
+        this.forgotOk = !!j.ok;
+      } catch (e) {
+        this.forgotMsg = 'Network error'; this.forgotOk = false;
+      }
+    },
+
+    // ===== CRITICAL: executeConfirm runs the callback ASYNC with loading state =====
+    // The modal stays open during the async work, showing a spinner on the confirm
+    // button. The modal only closes after the callback resolves (or on error, stays
+    // open so the user can retry).
+    async executeConfirm() {
+      const cb = this.confirmModal.onConfirm;
+      const requireInput = this.confirmModal.requireInput;
+      // If typed confirmation is required, refuse unless the input matches exactly
+      if (requireInput && this.confirmInput !== requireInput) {
+        this.toast("Andika neza: " + requireInput, 'error');
+        return;
+      }
+      if (this.confirmModal.loading) return;  // prevent double-click
+      this.confirmModal.loading = true;
+      try {
+        if (typeof cb === 'function') {
+          await cb();  // await async callbacks
+        }
+        // Success: close modal + reset state
+        this.confirmModal.open = false;
+        this.confirmModal.onConfirm = null;
+        this.confirmModal.requireInput = null;
+        this.confirmInput = '';
+      } catch (e) {
+        console.error('Confirm failed:', e);
+        this.toast(e?.message || 'Confirm failed', 'error');
+        // Keep modal open so user can retry
+      } finally {
+        this.confirmModal.loading = false;
+      }
+    },
+
+    // ---- helpers ----
+    employeeSvcCount(eid) {
+      return this.svcTransactions.filter(t => t.employee_id === eid)
+        .reduce((s,t)=>s+(t.num_clients||0), 0);
+    },
+    employeeSvcRevenue(eid) {
+      return this.svcTransactions.filter(t => t.employee_id === eid)
+        .reduce((s,t)=>s+(t.total_amount||0), 0);
+    },
+    fmt(v) {
+      try { return Number(v||0).toLocaleString(); } catch { return v; }
+    },
+    fmtMoney(v) {
+      try {
+        const n = Number(v||0);
+        return n.toLocaleString(undefined,{maximumFractionDigits:0}) + ' RWF';
+      } catch { return v; }
+    },
+    fmtDate(s) {
+      try {
+        const d = new Date(s);
+        return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      } catch { return s; }
+    },
+    toast(msg, type='info') {
+      const id = this.toastId++;
+      this.toasts.push({ id, msg, type });
+      setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 4000);
+    },
+
+    // ---- charts ----
+    _chartRefs: {},
+    renderCharts() {
+      const colors = {
+        gold:'#FFB020', emerald:'#00E599', purple:'#A855F7',
+        grid:'rgba(255,255,255,0.06)', text:'#94A3B8'
+      };
+      const baseOpts = (yLabel='') => ({
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{ labels:{ color:colors.text, font:{size:10} } } },
+        scales:{
+          x:{ ticks:{color:colors.text, font:{size:9}}, grid:{color:colors.grid} },
+          y:{ ticks:{color:colors.text, font:{size:9}}, grid:{color:colors.grid}, title:{display:!!yLabel,text:yLabel,color:colors.text} }
+        }
+      });
+
+      const renderBar = (id, data, color) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (this._chartRefs[id]) this._chartRefs[id].destroy();
+        this._chartRefs[id] = new Chart(el, {
+          type:'bar',
+          data:{
+            labels: data.map(d=>d.date||d.name),
+            datasets:[{ label:'Value', data:data.map(d=>d.value), backgroundColor:color, borderRadius:4 }]
+          },
+          options: baseOpts()
+        });
+      };
+
+      const renderLine = (id, data, color) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (this._chartRefs[id]) this._chartRefs[id].destroy();
+        this._chartRefs[id] = new Chart(el, {
+          type:'line',
+          data:{
+            labels: data.map(d=>d.date||d.name),
+            datasets:[{ label:'Value', data:data.map(d=>d.value), borderColor:color, backgroundColor:color+'33', tension:0.35, fill:true, pointRadius:3 }]
+          },
+          options: baseOpts()
+        });
+      };
+
+      const renderPie = (id, data) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        if (this._chartRefs[id]) this._chartRefs[id].destroy();
+        const palette = ['#FFB020','#00E599','#A855F7','#38BDF8','#FB7185','#FACC15','#34D399'];
+        this._chartRefs[id] = new Chart(el, {
+          type:'doughnut',
+          data:{
+            labels: data.map(d=>d.name||d.date),
+            datasets:[{ data:data.map(d=>d.value), backgroundColor:palette }]
+          },
+          options:{
+            responsive:true, maintainAspectRatio:false,
+            plugins:{ legend:{ labels:{color:colors.text, font:{size:10}} } }
+          }
+        });
+      };
+
+      const s7 = this.charts.sales_last_7_days || [];
+      const pf = this.charts.profit_trend || [];
+      const tp = this.charts.top_products || [];
+      const cat = this.charts.sales_by_category || [];
+
+      renderBar('chartSales7', s7, colors.gold);
+      renderLine('chartProfit', pf, colors.emerald);
+      renderBar('chartTopProducts', tp, colors.purple);
+      renderPie('chartCategory', cat);
+
+      renderBar('chartSales7a', s7, colors.gold);
+      renderLine('chartProfitA', pf, colors.emerald);
+      renderBar('chartTopProductsA', tp, colors.purple);
+      renderPie('chartCategoryA', cat);
+    }
+  };
+}
+</script>
+<style>[x-cloak]{display:none !important;}</style>
+</body>
+</html>
